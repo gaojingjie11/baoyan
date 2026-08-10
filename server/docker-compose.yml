@@ -8,5 +8,5 @@ services:
       CORS_ORIGIN: "https://baoyan-one.vercel.app"
       API_TOKEN: "${API_TOKEN:-}"
     ports:
-      - "8080:8080"
+      - "2026:8080"
     restart: unless-stopped

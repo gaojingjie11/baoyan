@@ -35,13 +35,13 @@ docker compose up -d --build
 ```
 - 只起 `api` 一个容器；数据库用你外部已有的 Postgres（上面 DATABASE_URL 指向它）。
 - 若 `baoyan` 库不存在，后端启动时会自动 `CREATE DATABASE baoyan`。
-- 后端监听 `8080`，映射到宿主机 `8080`。
+- 后端容器内监听 `8080`，映射到宿主机对外端口 `2026`（防火墙/安全组需放行 TCP 2026）。
 - 表 `progress_store` 首次启动自动创建。
 
 验证：
 ```bash
-curl http://localhost:8080/api/health          # {"ok":true}
-curl http://localhost:8080/api/progress         # {}  （初始为空）
+curl http://localhost:2026/api/health          # {"ok":true}
+curl http://localhost:2026/api/progress         # {}  （初始为空）
 ```
 
 > 若后端容器和 Postgres 在同一台服务器、连 `42.193.104.173` 不通，
