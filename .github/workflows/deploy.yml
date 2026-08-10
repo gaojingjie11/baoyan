@@ -1,0 +1,43 @@
+name: Deploy frontend
+
+# 前端自动部署到自托管服务器（同源 nginx：/var/www/baoyan，/api 反代 :2026）
+# 触发：push 到 main 且前端文件有变动；也支持手动 workflow_dispatch。
+# 前置：在 GitHub 仓库 Settings → Secrets 添加
+#   SERVER_HOST   = 42.193.104.173
+#   SERVER_USER   = 你的 SSH 用户名（如 root）
+#   SSH_PRIVATE_KEY = 部署私钥（公钥已写入服务器 ~/.ssh/authorized_keys）
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app.js'
+      - 'config.js'
+      - 'styles.css'
+      - 'schools.json'
+      - 'vercel.json'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: rsync to server
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEST: /var/www/baoyan
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+          rsync -avz --delete \
+            --exclude='.git' --exclude='server' --exclude='.github' \
+            ./ "$USER@$HOST:$DEST/"

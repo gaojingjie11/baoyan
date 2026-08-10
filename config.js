@@ -1,6 +1,6 @@
 // ===== 后端同步配置 =====
-// 把 API_BASE 改成你自托管后端的公网 HTTPS 地址，例如 https://baoyan-api.yourdomain.com
-// 留空 '' 则只使用本机浏览器存储（localStorage），不跨设备同步
+// 留空 '' → 走同源 /api（推荐：nginx 在同服务器上同时提供前端并反代 /api，无需域名/证书）
+// 若后端在别的地址（如 https://baoyan-api.yourdomain.com），填在这里
 window.BAOYAN_API = '';
 
 // 可选：若后端设置了 API_TOKEN，填在这里。

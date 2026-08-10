@@ -30,38 +30,41 @@ function progressMeta(key) { return PROGRESS.find(p => p.key === key) || PROGRES
 
 /* ---------- 后端同步（Go + Postgres，自托管） ---------- */
 const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
+// BAOYAN_API 留空 → 走同源 /api（nginx 同域部署时无需域名）；填了 → 用该绝对地址
+const API_URL = API_BASE ? API_BASE + '/api' : '/api';
 const API_TOKEN = window.BAOYAN_API_TOKEN || '';
+let apiConnected = false;
 
 async function loadProgressFromAPI() {
-  if (!API_BASE) return false;
   try {
-    const res = await fetch(API_BASE + '/api/progress', { cache: 'no-store' });
+    const res = await fetch(API_URL + '/progress', { cache: 'no-store' });
     if (!res.ok) return false;
     const data = await res.json();
     if (data && typeof data === 'object') {
       progressMap = data;
       try { localStorage.setItem(LS_KEY, JSON.stringify(progressMap)); } catch (e) {}
+      apiConnected = true;
       return true;
     }
   } catch (e) { /* 离线或后端不可达 → 退回本机存储 */ }
   return false;
 }
 async function saveProgressToAPI() {
-  if (!API_BASE) return;
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (API_TOKEN) headers['Authorization'] = 'Bearer ' + API_TOKEN;
-    await fetch(API_BASE + '/api/progress', {
+    await fetch(API_URL + '/progress', {
       method: 'POST',
       headers,
       body: JSON.stringify(progressMap),
     });
+    apiConnected = true;
   } catch (e) { /* 保存失败静默忽略，本机已有缓存 */ }
 }
 function updateSyncBadge() {
   const tip = document.querySelector('.sync-tip');
   if (!tip) return;
-  if (API_BASE) {
+  if (apiConnected || API_BASE) {
     tip.innerHTML = '已连接后端 · 进度自动同步到手机 / 电脑（本机也有缓存）';
     tip.classList.add('ok');
   } else {
