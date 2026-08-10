@@ -47,6 +47,18 @@ curl http://localhost:2026/api/progress         # {}  （初始为空）
 > 若后端容器和 Postgres 在同一台服务器、连 `42.193.104.173` 不通，
 > 可在 docker-compose.yml 的 api 下加 `network_mode: host`，并把 DATABASE_URL 主机改成 `localhost`。
 
+## 三、前端 HTTPS（必须）
+
+Vercel 前端是 HTTPS，浏览器会拦截它对 `http://` 后端的请求（混合内容）。
+所以后端前面必须有 HTTPS。二选一：
+
+- **Nginx（你选的）**：见 `nginx.conf.example`，再 `certbot --nginx -d 你的域名` 申请证书。
+- Caddy：见 `Caddyfile.example`，自动申请证书，更省事。
+- Cloudflare Tunnel：零反向代理，Cloudflare 直接给 HTTPS 公网地址。
+
+前端 `config.js` 里填 `window.BAOYAN_API = 'https://你的域名'`（域名走 443，
+由 Nginx/Caddy 转发到容器 2026），然后 `git push` 让 Vercel 重新部署。
+
 
 ## 二、让外网能访问（必须 HTTPS）
 
