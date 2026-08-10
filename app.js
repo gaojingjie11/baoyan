@@ -62,6 +62,18 @@ function countdownParts(ms) {
 function typeRank(t) { return t === '985' ? 0 : t === '211' ? 1 : 2; }
 const DIR_RANK = { '软件工程': 0, '计算机': 1, '网安': 2, '其他': 3 };
 function dirRank(d) { return DIR_RANK[d] !== undefined ? DIR_RANK[d] : 3; }
+
+/* 排序键：985/211 内，截止越近越前，时间不清的越后
+   ① 报名中/即将截止(有日期) → ② 已截止(有日期) → ③ 待发布/暂无数据(无日期)
+   同级再按 方向优先(软件工程>计算机>网安>其他) + id 兜底，保证顺序稳定可复现 */
+function sortKey(r) {
+  const st = stateOf(r);
+  const tie = dirRank(r.direction) * 1e9 + r.id;        // 方向优先 + id 兜底
+  if (!st.end) return 2e18 + tie;                       // 时间不清 → 最后
+  const endMs = st.end.getTime();
+  if (st.key === 'closed') return 1e18 + endMs;          // 已截止 → 中间（仍按截止时间）
+  return endMs;                                          // 报名中/即将截止 → 最前（越早截止越小）
+}
 const DIR_CLS = { '软件工程': 'dir-se', '计算机': 'dir-cs', '网安': 'dir-sec', '其他': 'dir-other' };
 
 function esc(s = '') { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -216,7 +228,7 @@ async function init() {
     const res = await fetch('./schools.json', { cache: 'no-store' });
     const payload = await res.json();
     rows = payload.schools || [];
-    rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || dirRank(a.direction) - dirRank(b.direction));
+    rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
     document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
     renderStats(); renderFocus(); renderReminder(); render();
   } catch (e) {
