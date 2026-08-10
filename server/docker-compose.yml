@@ -1,12 +1,19 @@
 services:
   api:
     build: .
-    # 数据库用你自己已有的 Postgres（见 .env 里的 DATABASE_URL），不再内置 db 容器
+    # 数据库用你已有的外部 Postgres（见 .env 的 DATABASE_URL），不再内置 db 容器
     environment:
       PORT: "8080"
       DATABASE_URL: "${DATABASE_URL}"
       CORS_ORIGIN: "https://baoyan-one.vercel.app"
-      API_TOKEN: "${API_TOKEN:-}"
+      JWT_SECRET: "${JWT_SECRET:-}"        # 务必设置固定值；留空则运行时随机（重启失效）
+      PASSWORD_PEPPER: "${PASSWORD_PEPPER:-}"
     ports:
       - "2026:8080"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

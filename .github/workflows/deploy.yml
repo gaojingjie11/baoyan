@@ -1,11 +1,11 @@
-name: Deploy frontend
+name: Deploy frontend + backend
 
-# 前端自动部署到自托管服务器（同源 nginx：/var/www/baoyan，/api 反代 :2026）
-# 触发：push 到 main 且前端文件有变动；也支持手动 workflow_dispatch。
-# 前置：在 GitHub 仓库 Settings → Secrets 添加
+# 推送 main 时：① rsync 前端到服务器 /var/www/baoyan；② SSH 到服务器 git pull + 重建后端容器。
+# 前置：GitHub 仓库 Settings → Secrets 添加
 #   SERVER_HOST   = 42.193.104.173
 #   SERVER_USER   = 你的 SSH 用户名（如 root）
 #   SSH_PRIVATE_KEY = 部署私钥（公钥已写入服务器 ~/.ssh/authorized_keys）
+# 服务器需已跑过一次 server/setup.sh（克隆仓库到 /opt/baoyan 并起过后端）。
 
 on:
   push:
@@ -17,6 +17,7 @@ on:
       - 'styles.css'
       - 'schools.json'
       - 'vercel.json'
+      - 'server/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -26,18 +27,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: rsync to server
+      - name: 准备 SSH
         env:
           HOST: ${{ secrets.SERVER_HOST }}
           USER: ${{ secrets.SERVER_USER }}
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          DEST: /var/www/baoyan
         run: |
           set -e
           mkdir -p ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+
+      - name: rsync 前端到服务器
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+          DEST: /var/www/baoyan
+        run: |
           rsync -avz --delete \
             --exclude='.git' --exclude='server' --exclude='.github' \
             ./ "$USER@$HOST:$DEST/"
+
+      - name: 服务器端拉代码并重建后端
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh "$USER@$HOST" 'set -e; cd /opt/baoyan && git pull --ff-only && cd server && docker compose up -d --build'

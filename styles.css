@@ -140,3 +140,22 @@ select.progress.p-adm{color:var(--p-adm);background:var(--p-adm-bg);border-color
   .card{flex-direction:row;justify-content:space-between;align-items:stretch}
   .card-side{justify-content:center}
 }
+
+/* ---------- 登录遮罩 ---------- */
+.login-overlay{position:fixed;inset:0;background:rgba(15,23,42,.92);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.login-card{background:#fff;border-radius:18px;padding:28px 26px;width:min(360px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-card h2{margin:0 0 4px;font-size:22px}
+.login-sub{margin:0 0 18px;color:var(--muted);font-size:13px}
+.login-card label{display:block;font-size:13px;color:var(--muted);font-weight:650;margin-bottom:12px}
+.login-card input{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:15px;outline:none}
+.login-card input:focus{border-color:#bfdbfe}
+.login-btn{width:100%;border:none;background:#1d4ed8;color:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:650;cursor:pointer}
+.login-btn:hover{background:#1e40af}
+.login-err{color:var(--red);font-size:13px;margin-top:12px;min-height:18px;text-align:center}
+body.locked{overflow:hidden}
+
+/* ---------- 用户条 ---------- */
+.userbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:14px;font-size:13px;color:#dbeafe}
+.userbar .uname b{color:#fff}
+.logout-btn{border:1px solid rgba(255,255,255,.25);background:transparent;color:#dbeafe;border-radius:999px;padding:4px 12px;font-size:12px;cursor:pointer;font:inherit}
+.logout-btn:hover{background:rgba(255,255,255,.12)}

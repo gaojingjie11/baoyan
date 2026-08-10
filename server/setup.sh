@@ -27,6 +27,12 @@ rsync -avz --delete \
 echo "==> [3/6] 后端环境变量"
 cd "$APP_DIR/server"
 [ -f .env ] || cp .env.example .env
+# 若 JWT_SECRET 为空，生成一个稳定的随机密钥写入 .env（避免每次重启失效）
+if grep -q '^JWT_SECRET=$' .env; then
+  JWT_VAL=$(head -c 32 /dev/urandom | base64 | tr -d '/+' | head -c 43)
+  sed -i "s#^JWT_SECRET=#JWT_SECRET=$JWT_VAL#" .env
+  echo "    已生成随机 JWT_SECRET 写入 .env"
+fi
 echo "    .env 已就绪（含外部 Postgres 连接串，密码 @ 已转 %40）"
 
 echo "==> [4/6] 启动后端（Docker）"

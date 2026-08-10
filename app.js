@@ -9,8 +9,69 @@ const stats = document.querySelector('#stats');
 const reminder = document.querySelector('#reminder');
 const focus = document.querySelector('#focus');
 
-/* ---------- 个人进度：localStorage ---------- */
-const LS_KEY = 'bjt_progress_v1';
+/* ---------- 登录态（JWT 长短 token） ---------- */
+const LS_ACCESS = 'bjt_access';
+const LS_REFRESH = 'bjt_refresh';
+const LS_USER = 'bjt_user';
+let accessToken = localStorage.getItem(LS_ACCESS) || '';
+let refreshToken = localStorage.getItem(LS_REFRESH) || '';
+let currentUser = (() => { try { return JSON.parse(localStorage.getItem(LS_USER) || 'null'); } catch (e) { return null; } })();
+
+const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
+// BAOYAN_API 留空 → 走同源 /api（nginx 同域部署时无需域名）；填了 → 用该绝对地址
+const API_URL = API_BASE ? API_BASE + '/api' : '/api';
+
+function setTokens(access, refresh, user) {
+  accessToken = access || '';
+  refreshToken = refresh || '';
+  currentUser = user || null;
+  accessToken ? localStorage.setItem(LS_ACCESS, accessToken) : localStorage.removeItem(LS_ACCESS);
+  refreshToken ? localStorage.setItem(LS_REFRESH, refreshToken) : localStorage.removeItem(LS_REFRESH);
+  user ? localStorage.setItem(LS_USER, JSON.stringify(user)) : localStorage.removeItem(LS_USER);
+}
+function clearTokens() { setTokens('', '', null); }
+
+// 带鉴权 + 自动刷新（短 token 过期 → 用长 token 换新短 token）的请求
+let refreshing = false;
+let refreshWaiters = [];
+async function apiFetch(url, opts = {}) {
+  if (!accessToken) throw new Error('not_logged_in');
+  opts.headers = Object.assign({}, opts.headers, { 'Authorization': 'Bearer ' + accessToken });
+  let res = await fetch(API_URL + url, opts);
+  if (res.status === 401 && refreshToken) {
+    const ok = await doRefresh();
+    if (ok) {
+      opts.headers['Authorization'] = 'Bearer ' + accessToken;
+      res = await fetch(API_URL + url, opts);
+    } else {
+      throw new Error('not_logged_in');
+    }
+  }
+  return res;
+}
+async function doRefresh() {
+  if (refreshing) return new Promise(resolve => refreshWaiters.push(resolve));
+  refreshing = true;
+  try {
+    const res = await fetch(API_URL + '/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!res.ok) { clearTokens(); return false; }
+    const data = await res.json();
+    setTokens(data.access_token, data.refresh_token, data.user);
+    return true;
+  } catch (e) { clearTokens(); return false; }
+  finally {
+    refreshing = false;
+    refreshWaiters.forEach(r => r(true));
+    refreshWaiters = [];
+  }
+}
+
+/* ---------- 个人进度：localStorage 缓存 + 后端（按用户隔离） ---------- */
+const LS_PROGRESS = 'bjt_progress_v1';
 const PROGRESS = [
   { key: '',       label: '未报名', cls: 'p-none' },
   { key: 'applied',label: '已报名', cls: 'p-applied' },
@@ -19,53 +80,84 @@ const PROGRESS = [
   { key: 'adm',    label: '已录取', cls: 'p-adm' },
 ];
 let progressMap = {};
-try { progressMap = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { progressMap = {}; }
+try { progressMap = JSON.parse(localStorage.getItem(LS_PROGRESS) || '{}'); } catch (e) { progressMap = {}; }
 function getProgress(id) { return progressMap[id] || ''; }
 function setProgress(id, val) {
   if (val) progressMap[id] = val; else delete progressMap[id];
-  try { localStorage.setItem(LS_KEY, JSON.stringify(progressMap)); } catch (e) {}
+  try { localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap)); } catch (e) {}
   saveProgressToAPI();
 }
 function progressMeta(key) { return PROGRESS.find(p => p.key === key) || PROGRESS[0]; }
 
-/* ---------- 后端同步（Go + Postgres，自托管） ---------- */
-const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
-// BAOYAN_API 留空 → 走同源 /api（nginx 同域部署时无需域名）；填了 → 用该绝对地址
-const API_URL = API_BASE ? API_BASE + '/api' : '/api';
-const API_TOKEN = window.BAOYAN_API_TOKEN || '';
-let apiConnected = false;
-
 async function loadProgressFromAPI() {
   try {
-    const res = await fetch(API_URL + '/progress', { cache: 'no-store' });
+    const res = await apiFetch('/progress', { cache: 'no-store' });
     if (!res.ok) return false;
     const data = await res.json();
     if (data && typeof data === 'object') {
       progressMap = data;
-      try { localStorage.setItem(LS_KEY, JSON.stringify(progressMap)); } catch (e) {}
-      apiConnected = true;
+      try { localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap)); } catch (e) {}
       return true;
     }
-  } catch (e) { /* 离线或后端不可达 → 退回本机存储 */ }
+  } catch (e) { /* 未登录 / 失败 */ }
   return false;
 }
 async function saveProgressToAPI() {
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (API_TOKEN) headers['Authorization'] = 'Bearer ' + API_TOKEN;
-    await fetch(API_URL + '/progress', {
+    await apiFetch('/progress', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(progressMap),
     });
-    apiConnected = true;
-  } catch (e) { /* 保存失败静默忽略，本机已有缓存 */ }
+  } catch (e) { /* 忽略（本地已有缓存） */ }
 }
+
+/* ---------- 登录 / 登出 ---------- */
+const loginEl = document.querySelector('#login');
+const loginForm = document.querySelector('#login-form');
+const loginErr = document.querySelector('#login-err');
+const userbar = document.querySelector('#userbar');
+const userNameEl = document.querySelector('#user-name');
+const btnLogout = document.querySelector('#btn-logout');
+
+function showLogin() { loginEl.hidden = false; document.body.classList.add('locked'); }
+function hideLogin() { loginEl.hidden = true; document.body.classList.remove('locked'); }
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  loginErr.textContent = '';
+  const username = loginForm.username.value.trim();
+  const password = loginForm.password.value;
+  try {
+    const res = await fetch(API_URL + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { loginErr.textContent = data.error || '登录失败'; return; }
+    setTokens(data.access_token, data.refresh_token, data.user);
+    hideLogin();
+    await bootstrap();
+  } catch (e) { loginErr.textContent = '无法连接后端'; }
+});
+btnLogout.addEventListener('click', async () => {
+  try {
+    await fetch(API_URL + '/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+  } catch (e) {}
+  clearTokens();
+  showLogin();
+});
+
 function updateSyncBadge() {
   const tip = document.querySelector('.sync-tip');
   if (!tip) return;
-  if (apiConnected || API_BASE) {
-    tip.innerHTML = '已连接后端 · 进度自动同步到手机 / 电脑（本机也有缓存）';
+  if (currentUser) {
+    tip.innerHTML = `已登录 <b>${esc(currentUser.username)}</b> · 进度自动同步到手机 / 电脑`;
     tip.classList.add('ok');
   } else {
     tip.innerHTML = '进度仅存本设备 · 换设备前先「导出」，到新设备「导入」';
@@ -109,16 +201,14 @@ function typeRank(t) { return t === '985' ? 0 : t === '211' ? 1 : 2; }
 const DIR_RANK = { '软件工程': 0, '计算机': 1, '网安': 2, '其他': 3 };
 function dirRank(d) { return DIR_RANK[d] !== undefined ? DIR_RANK[d] : 3; }
 
-/* 排序键：985/211 内，截止越近越前，时间不清的越后
-   ① 报名中/即将截止(有日期) → ② 已截止(有日期) → ③ 待发布/暂无数据(无日期)
-   同级再按 方向优先(软件工程>计算机>网安>其他) + id 兜底，保证顺序稳定可复现 */
+/* 排序键：985/211 内，截止越近越前，时间不清的越后 */
 function sortKey(r) {
   const st = stateOf(r);
-  const tie = dirRank(r.direction) * 1e9 + r.id;        // 方向优先 + id 兜底
-  if (!st.end) return 2e18 + tie;                       // 时间不清 → 最后
+  const tie = dirRank(r.direction) * 1e9 + r.id;
+  if (!st.end) return 2e18 + tie;
   const endMs = st.end.getTime();
-  if (st.key === 'closed') return 1e18 + endMs;          // 已截止 → 中间（仍按截止时间）
-  return endMs;                                          // 报名中/即将截止 → 最前（越早截止越小）
+  if (st.key === 'closed') return 1e18 + endMs;
+  return endMs;
 }
 const DIR_CLS = { '软件工程': 'dir-se', '计算机': 'dir-cs', '网安': 'dir-sec', '其他': 'dir-other' };
 
@@ -128,7 +218,7 @@ function link(url, label, secondary = false) {
   return `<a class="btn ${secondary ? 'secondary' : ''}" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`;
 }
 
-/* ---------- 顶部「我的进度」统计（可点击筛选） ---------- */
+/* ---------- 顶部「我的进度」统计 ---------- */
 function renderStats() {
   const counts = { '': 0, applied: 0, iv: 0, adw: 0, adm: 0 };
   rows.forEach(r => { counts[getProgress(r.id)] = (counts[getProgress(r.id)] || 0) + 1; });
@@ -162,7 +252,7 @@ function renderFocus() {
     col('📌 我的进行中', 'f-mine', mine, r => `<div class="focus-item"><span>${esc(r.school)}</span><b>${progressMeta(getProgress(r.id)).label}</b></div>`);
 }
 
-/* ---------- 紧急提醒（7天内截止，实时倒计时） ---------- */
+/* ---------- 紧急提醒 ---------- */
 function renderReminder() {
   const soon = rows.filter(r => stateOf(r).key === 'soon').sort((a, b) => (parseEnd(a.end) || 0) - (parseEnd(b.end) || 0));
   if (!soon.length) { reminder.hidden = true; reminder.innerHTML = ''; return; }
@@ -230,7 +320,7 @@ function render() {
   tick();
 }
 
-/* ---------- 实时倒计时刷新 ---------- */
+/* ---------- 实时倒计时 ---------- */
 function tick() {
   document.querySelectorAll('.countdown[data-end], .reminder-item[data-end]').forEach(el => {
     const ms = el.getAttribute('data-end');
@@ -253,7 +343,7 @@ document.querySelectorAll('.chip[data-group]').forEach(btn => btn.addEventListen
   setFilter(btn.dataset.group, btn.dataset.value);
 }));
 
-/* ---------- 进度下拉（事件委托） ---------- */
+/* ---------- 进度下拉 ---------- */
 list.addEventListener('change', e => {
   const sel = e.target.closest('select.progress');
   if (!sel) return;
@@ -268,7 +358,7 @@ list.addEventListener('change', e => {
 
 search.addEventListener('input', render);
 
-/* ---------- 进度导出 / 导入（跨设备同步，无需后端） ---------- */
+/* ---------- 进度导出 / 导入（备份，无需后端） ---------- */
 function exportProgress() {
   const blob = new Blob([JSON.stringify(progressMap, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -292,7 +382,7 @@ function importProgress(file) {
         const v = data[id];
         if (PROGRESS.some(p => p.key === v)) { progressMap[id] = v; n++; }
       });
-      localStorage.setItem(LS_KEY, JSON.stringify(progressMap));
+      localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap));
       renderStats(); renderFocus(); render(); saveProgressToAPI();
       flashSync(`已导入 ${n} 条进度`);
     } catch (e) {
@@ -309,8 +399,8 @@ function flashSync(msg, isErr) {
   tip.classList.toggle('err', !!isErr);
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
-    tip.textContent = '进度仅存本设备 · 换设备前先「导出」，到新设备「导入」';
-    tip.classList.remove('err');
+    if (currentUser) { updateSyncBadge(); }
+    else { tip.textContent = '进度仅存本设备 · 换设备前先「导出」，到新设备「导入」'; tip.classList.remove('err'); }
   }, 2600);
 }
 document.querySelector('#btn-export').addEventListener('click', exportProgress);
@@ -321,20 +411,29 @@ document.querySelector('#file-import').addEventListener('change', e => {
 });
 
 /* ---------- 初始化 ---------- */
+async function bootstrap() {
+  const res = await fetch('./schools.json', { cache: 'no-store' });
+  const payload = await res.json();
+  rows = payload.schools || [];
+  rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
+  document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
+  await loadProgressFromAPI();
+  if (!accessToken) { showLogin(); return; } // 刷新失败被清空 → 回到登录
+  updateSyncBadge();
+  if (currentUser && userNameEl) userNameEl.textContent = currentUser.username;
+  if (userbar) userbar.hidden = false;
+  renderStats(); renderFocus(); renderReminder(); render();
+}
+
 async function init() {
+  if (!accessToken) { showLogin(); return; }
   try {
-    const res = await fetch('./schools.json', { cache: 'no-store' });
-    const payload = await res.json();
-    rows = payload.schools || [];
-    rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
-    document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
-    await loadProgressFromAPI();
-    updateSyncBadge();
-    renderStats(); renderFocus(); renderReminder(); render();
+    await bootstrap();
   } catch (e) {
     document.querySelector('#updated').textContent = '数据加载失败';
     document.querySelector('#empty').hidden = false;
-    document.querySelector('#empty').textContent = '无法加载 schools.json';
+    document.querySelector('#empty').textContent = '无法加载 schools.json 或后端不可用';
+    showLogin();
   }
 }
 setInterval(tick, 30000);

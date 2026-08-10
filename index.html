@@ -9,8 +9,24 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- 登录遮罩 -->
+  <div id="login" class="login-overlay" hidden>
+    <form id="login-form" class="login-card">
+      <h2>登录追踪器</h2>
+      <p class="login-sub">进度按账号隔离，手机 / 电脑同一账号自动同步</p>
+      <label>用户名<input name="username" autocomplete="username" required></label>
+      <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit" class="login-btn">登录</button>
+      <div id="login-err" class="login-err"></div>
+    </form>
+  </div>
+
   <header class="hero">
     <div class="wrap">
+      <div class="userbar" id="userbar" hidden>
+        <span class="uname">👤 <b id="user-name"></b></span>
+        <button id="btn-logout" class="logout-btn">退出</button>
+      </div>
       <div class="eyebrow">2027 推免申请 · 我的追踪器</div>
       <h1>计算机预推免追踪</h1>
       <p>985 优先 · 211 随后 · 软件工程 / 计算机 / 网安 方向</p>
