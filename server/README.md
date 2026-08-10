@@ -92,6 +92,13 @@ docker compose up -d --build
 
 ## 三、前端部署（同源，免域名/证书）★ 推荐
 
+### 首次部署：一键脚本（推荐先做这个）
+在**服务器上**执行一次，即可完成「拉代码 + 前端同步 + 后端启动 + nginx + 防火墙」全部动作（前提：服务器已装 `git`、`docker`+`docker compose` 插件、`nginx`；`rsync` 一般自带，缺则 `apt install rsync`）：
+```bash
+curl -fsSL https://raw.githubusercontent.com/gaojingjie11/baoyan/main/server/setup.sh | bash
+```
+脚本把仓库 clone 到 `/opt/baoyan`。之后你在本地 `git push`，前端会由 GitHub Actions 自动 rsync 到 `/var/www/baoyan`（需先在 GitHub 配好 3 个 secret，见方式 A）。后端只在 `server/` 变动时才需重跑 `docker compose up`。
+
 ### 方式 A：GitHub Actions 自动部署（推荐）
 每次 push 到 `main`，GitHub Actions 把前端文件 rsync 到服务器 `/var/www/baoyan`。
 需要先在 GitHub 仓库 **Settings → Secrets** 添加：
