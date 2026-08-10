@@ -6,7 +6,7 @@
   /* 个人进度配色 */
   --p-none:#94a3b8;--p-applied:#2563eb;--p-applied-bg:#eff6ff;
   --p-iv:#d97706;--p-iv-bg:#fef3c7;--p-adw:#7c3aed;--p-adw-bg:#ede9fe;
-  --p-adm:#16a34a;--p-adm-bg:#dcfce7;
+  --p-adm:#16a34a;--p-adm-bg:#dcfce7;--p-failed:#dc2626;--p-failed-bg:#fee2e2;
 }
 :root[data-theme="dark"]{color-scheme:dark;--bg:#0f172a;--card:#172033;--text:#e2e8f0;--muted:#94a3b8;--line:#334155;--gray:#cbd5e1;--gray-bg:#1e293b}
 :root[data-theme="light"]{color-scheme:light}
@@ -32,7 +32,7 @@ h1{font-size:30px;margin:0 0 8px}
 .stat b{display:block;font-size:22px}
 .stat span{font-size:12px;color:var(--muted)}
 .stat.p-none b{color:var(--p-none)}.stat.p-applied b{color:var(--p-applied)}
-.stat.p-iv b{color:var(--p-iv)}.stat.p-adw b{color:var(--p-adw)}.stat.p-adm b{color:var(--p-adm)}
+.stat.p-iv b{color:var(--p-iv)}.stat.p-adw b{color:var(--p-adw)}.stat.p-adm b{color:var(--p-adm)}.stat.p-failed b{color:var(--p-failed)}
 .stat.s-open b{color:var(--green)}.stat.s-soon b{color:var(--amber)}
 
 /* ---------- 今日关注 ---------- */
@@ -94,6 +94,7 @@ h1{font-size:30px;margin:0 0 8px}
 .card.p-iv{border-left-color:var(--p-iv)}
 .card.p-adw{border-left-color:var(--p-adw)}
 .card.p-adm{border-left-color:var(--p-adm)}
+.card.p-failed{border-left-color:var(--p-failed)}
 /* 官方紧急度 */
 .card.soon{border-top-color:#f59e0b;border-right-color:#f59e0b;border-bottom-color:#f59e0b}
 .card.closed{opacity:.72}
@@ -128,6 +129,7 @@ select.progress.p-applied{color:var(--p-applied);background:var(--p-applied-bg);
 select.progress.p-iv{color:var(--p-iv);background:var(--p-iv-bg);border-color:#fcd34d}
 select.progress.p-adw{color:var(--p-adw);background:var(--p-adw-bg);border-color:#c4b5fd}
 select.progress.p-adm{color:var(--p-adm);background:var(--p-adm-bg);border-color:#86efac}
+select.progress.p-failed{color:var(--p-failed);background:var(--p-failed-bg);border-color:#fca5a5}
 .actions{display:flex;flex-direction:column;gap:8px}
 .btn{display:block;text-decoration:none;text-align:center;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:650;border:1px solid #bfdbfe;color:#1d4ed8;background:#eff6ff}
 .btn.secondary{border-color:var(--line);color:#475569;background:#fff}

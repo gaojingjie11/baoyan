@@ -16,7 +16,7 @@ import (
 	"github.com/lib/pq"
 )
 
-var validStatus = map[string]bool{"": true, "applied": true, "iv": true, "adw": true, "adm": true}
+var validStatus = map[string]bool{"": true, "applied": true, "iv": true, "adw": true, "adm": true, "failed": true}
 
 func writeJSON(w http.ResponseWriter, code int, value any) {
 	w.Header().Set("Content-Type", "application/json")

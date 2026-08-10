@@ -68,6 +68,7 @@ const PROGRESS = [
   { key: 'iv',     label: '待复试', cls: 'p-iv' },
   { key: 'adw',    label: '待录取', cls: 'p-adw' },
   { key: 'adm',    label: '已录取', cls: 'p-adm' },
+  { key: 'failed', label: '已失败', cls: 'p-failed' },
 ];
 let progressMap = {};
 function getProgress(id) { return progressMap[id] || ''; }
@@ -224,7 +225,7 @@ function link(url, label, secondary = false) {
 
 /* ---------- 顶部「我的进度」统计 ---------- */
 function renderStats() {
-  const counts = { '': 0, applied: 0, iv: 0, adw: 0, adm: 0 };
+  const counts = { '': 0, applied: 0, iv: 0, adw: 0, adm: 0, failed: 0 };
   rows.forEach(r => { counts[getProgress(r.id)] = (counts[getProgress(r.id)] || 0) + 1; });
   const open = rows.filter(r => ['open', 'soon'].includes(stateOf(r).key)).length;
   const soon = rows.filter(r => stateOf(r).key === 'soon').length;
