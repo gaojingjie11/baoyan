@@ -50,4 +50,6 @@ sudo /opt/baoyan/server/deploy.sh        # 更新部署（拉代码 + 重建后�
 sudo /opt/baoyan/server/verify.sh        # 健康检查
 ```
 
+`deploy.sh` 会在新版本通过健康检查后自动删除无引用的旧镜像，并清理 7 天前的 Docker 构建缓存；当前使用中的容器和近 7 天缓存会保留。
+
 当前为 HTTP-only 配置。请勿在不受信任网络上传输账号密码，后续应给 Nginx 加 HTTPS。
