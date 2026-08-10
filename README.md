@@ -16,4 +16,4 @@
 3. 运行 `sudo /opt/baoyan/server/setup.sh`，随后在 GitHub 配置 `SERVER_HOST`、`SERVER_USER`、`SSH_PRIVATE_KEY` 和固定的 `SERVER_KNOWN_HOSTS` Secrets。
 4. 用 `sudo /opt/baoyan/server/verify.sh` 检查健康状态和表结构。
 
-此部署按当前要求使用 HTTP。HTTP 会暴露登录密码和会话给网络监听者，不能用于不受信任的网络；启用公网使用前应迁移至 HTTPS。
+此部署按当前要求通过 `http://服务器IP:26` 提供 HTTP 服务。HTTP 会暴露登录密码和会话给网络监听者，不能用于不受信任的网络；启用公网使用前应迁移至 HTTPS。

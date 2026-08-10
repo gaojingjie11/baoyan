@@ -41,9 +41,9 @@ else
   echo "   cp $APP_DIR/server/nginx.conf /etc/nginx/conf.d/baoyan.conf && nginx -t && systemctl reload nginx"
 fi
 
-echo "==> [4/5] 防火墙放行 80"
-command -v ufw >/dev/null 2>&1 && ufw allow 80/tcp
-command -v firewall-cmd >/dev/null 2>&1 && { firewall-cmd --add-port=80/tcp --permanent; firewall-cmd --reload; }
+echo "==> [4/5] 防火墙放行 26"
+command -v ufw >/dev/null 2>&1 && ufw allow 26/tcp
+command -v firewall-cmd >/dev/null 2>&1 && { firewall-cmd --add-port=26/tcp --permanent; firewall-cmd --reload; }
 echo "    TCP 2026 is loopback-only; do not open it in the security group."
 
 echo
