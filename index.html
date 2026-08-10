@@ -25,6 +25,13 @@
     <div class="wrap">
       <div class="userbar" id="userbar" hidden>
         <span class="uname">👤 <b id="user-name"></b></span>
+        <label class="theme-label">主题
+          <select id="theme" aria-label="主题">
+            <option value="system">跟随系统</option>
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+          </select>
+        </label>
         <button id="btn-logout" class="logout-btn">退出</button>
       </div>
       <div class="eyebrow">2027 推免申请 · 我的追踪器</div>
@@ -113,7 +120,7 @@
   </main>
 
   <footer class="wrap footer">
-    进度标记保存在本设备浏览器（localStorage），不会自动同步到其他设备。时间与政策以高校官方通知为准。
+    登录后进度按账号同步；时间与政策以高校官方通知为准。
   </footer>
 
   <script src="config.js"></script>

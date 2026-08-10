@@ -9,36 +9,25 @@ const stats = document.querySelector('#stats');
 const reminder = document.querySelector('#reminder');
 const focus = document.querySelector('#focus');
 
-/* ---------- 登录态（JWT 长短 token） ---------- */
-const LS_ACCESS = 'bjt_access';
-const LS_REFRESH = 'bjt_refresh';
-const LS_USER = 'bjt_user';
-let accessToken = localStorage.getItem(LS_ACCESS) || '';
-let refreshToken = localStorage.getItem(LS_REFRESH) || '';
-let currentUser = (() => { try { return JSON.parse(localStorage.getItem(LS_USER) || 'null'); } catch (e) { return null; } })();
+/* ---------- 登录态（内存 Access Token + HttpOnly Refresh Cookie） ---------- */
+let accessToken = '';
+let currentUser = null;
 
 const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
 // BAOYAN_API 留空 → 走同源 /api（nginx 同域部署时无需域名）；填了 → 用该绝对地址
 const API_URL = API_BASE ? API_BASE + '/api' : '/api';
 
-function setTokens(access, refresh, user) {
-  accessToken = access || '';
-  refreshToken = refresh || '';
-  currentUser = user || null;
-  accessToken ? localStorage.setItem(LS_ACCESS, accessToken) : localStorage.removeItem(LS_ACCESS);
-  refreshToken ? localStorage.setItem(LS_REFRESH, refreshToken) : localStorage.removeItem(LS_REFRESH);
-  user ? localStorage.setItem(LS_USER, JSON.stringify(user)) : localStorage.removeItem(LS_USER);
-}
-function clearTokens() { setTokens('', '', null); }
+function setSession(access, user) { accessToken = access || ''; currentUser = user || null; }
+function clearSession() { accessToken = ''; currentUser = null; progressMap = {}; }
 
-// 带鉴权 + 自动刷新（短 token 过期 → 用长 token 换新短 token）的请求
+// 带鉴权 + 自动刷新（短 token 过期 → HttpOnly 长 token 换新短 token）的请求
 let refreshing = false;
 let refreshWaiters = [];
 async function apiFetch(url, opts = {}) {
   if (!accessToken) throw new Error('not_logged_in');
   opts.headers = Object.assign({}, opts.headers, { 'Authorization': 'Bearer ' + accessToken });
   let res = await fetch(API_URL + url, opts);
-  if (res.status === 401 && refreshToken) {
+  if (res.status === 401) {
     const ok = await doRefresh();
     if (ok) {
       opts.headers['Authorization'] = 'Bearer ' + accessToken;
@@ -52,26 +41,27 @@ async function apiFetch(url, opts = {}) {
 async function doRefresh() {
   if (refreshing) return new Promise(resolve => refreshWaiters.push(resolve));
   refreshing = true;
+  let ok = false;
   try {
     const res = await fetch(API_URL + '/auth/refresh', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'same-origin',
     });
-    if (!res.ok) { clearTokens(); return false; }
+    if (!res.ok) { clearSession(); return false; }
     const data = await res.json();
-    setTokens(data.access_token, data.refresh_token, data.user);
+    setSession(data.access_token, data.user);
+    ok = true;
     return true;
-  } catch (e) { clearTokens(); return false; }
+  } catch (e) { clearSession(); return false; }
   finally {
     refreshing = false;
-    refreshWaiters.forEach(r => r(true));
+    refreshWaiters.forEach(r => r(ok));
     refreshWaiters = [];
   }
 }
 
 /* ---------- 个人进度：localStorage 缓存 + 后端（按用户隔离） ---------- */
-const LS_PROGRESS = 'bjt_progress_v1';
+function progressStorageKey() { return currentUser ? `bjt_progress_v2:${currentUser.id}` : ''; }
 const PROGRESS = [
   { key: '',       label: '未报名', cls: 'p-none' },
   { key: 'applied',label: '已报名', cls: 'p-applied' },
@@ -80,12 +70,11 @@ const PROGRESS = [
   { key: 'adm',    label: '已录取', cls: 'p-adm' },
 ];
 let progressMap = {};
-try { progressMap = JSON.parse(localStorage.getItem(LS_PROGRESS) || '{}'); } catch (e) { progressMap = {}; }
 function getProgress(id) { return progressMap[id] || ''; }
 function setProgress(id, val) {
   if (val) progressMap[id] = val; else delete progressMap[id];
-  try { localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap)); } catch (e) {}
-  saveProgressToAPI();
+  try { localStorage.setItem(progressStorageKey(), JSON.stringify(progressMap)); } catch (e) {}
+  saveProgressToAPI(id, val);
 }
 function progressMeta(key) { return PROGRESS.find(p => p.key === key) || PROGRESS[0]; }
 
@@ -96,19 +85,20 @@ async function loadProgressFromAPI() {
     const data = await res.json();
     if (data && typeof data === 'object') {
       progressMap = data;
-      try { localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap)); } catch (e) {}
+      try { localStorage.setItem(progressStorageKey(), JSON.stringify(progressMap)); } catch (e) {}
       return true;
     }
   } catch (e) { /* 未登录 / 失败 */ }
   return false;
 }
-async function saveProgressToAPI() {
+async function saveProgressToAPI(id, status) {
   try {
-    await apiFetch('/progress', {
-      method: 'POST',
+    const res = await apiFetch('/progress/' + encodeURIComponent(id), {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(progressMap),
+      body: JSON.stringify({ status }),
     });
+    if (!res.ok) throw new Error('save failed');
   } catch (e) { /* 忽略（本地已有缓存） */ }
 }
 
@@ -136,7 +126,7 @@ loginForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (!res.ok) { loginErr.textContent = data.error || '登录失败'; return; }
-    setTokens(data.access_token, data.refresh_token, data.user);
+    setSession(data.access_token, data.user);
     hideLogin();
     await bootstrap();
   } catch (e) { loginErr.textContent = '无法连接后端'; }
@@ -145,11 +135,12 @@ btnLogout.addEventListener('click', async () => {
   try {
     await fetch(API_URL + '/auth/logout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: 'same-origin',
     });
   } catch (e) {}
-  clearTokens();
+  clearSession();
+  userbar.hidden = true;
+  list.innerHTML = ''; stats.innerHTML = ''; focus.innerHTML = ''; reminder.hidden = true;
   showLogin();
 });
 
@@ -164,6 +155,19 @@ function updateSyncBadge() {
     tip.classList.remove('ok');
   }
 }
+
+function applyTheme() {
+  const theme = currentUser?.theme?.theme || 'system';
+  document.documentElement.dataset.theme = theme;
+  const select = document.querySelector('#theme');
+  if (select) select.value = theme;
+}
+
+document.querySelector('#theme').addEventListener('change', async e => {
+  const theme = e.target.value;
+  const res = await apiFetch('/me/theme', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ theme }) });
+  if (res.ok && currentUser) { currentUser.theme = { theme }; applyTheme(); }
+});
 
 /* ---------- 时间与官方报名状态 ---------- */
 function todayCN() {
@@ -326,8 +330,12 @@ function tick() {
     const ms = el.getAttribute('data-end');
     if (!ms) return;
     const p = countdownParts(Number(ms));
-    if (!p || p.done) { el.textContent = el.classList.contains('reminder-item') ? '已结束' : '⏳ 已结束'; return; }
-    el.textContent = el.classList.contains('reminder-item') ? p.text : `⏳ 距截止 ${p.text}`;
+    if (el.classList.contains('reminder-item')) {
+      const time = el.querySelector('.r-time');
+      if (time) time.textContent = !p || p.done ? '已结束' : p.text;
+      return;
+    }
+    el.textContent = !p || p.done ? '⏳ 已结束' : `⏳ 距截止 ${p.text}`;
   });
 }
 
@@ -382,8 +390,11 @@ function importProgress(file) {
         const v = data[id];
         if (PROGRESS.some(p => p.key === v)) { progressMap[id] = v; n++; }
       });
-      localStorage.setItem(LS_PROGRESS, JSON.stringify(progressMap));
-      renderStats(); renderFocus(); render(); saveProgressToAPI();
+      localStorage.setItem(progressStorageKey(), JSON.stringify(progressMap));
+      renderStats(); renderFocus(); render();
+      Object.entries(data).forEach(([id, status]) => {
+        if (PROGRESS.some(p => p.key === status)) saveProgressToAPI(id, status);
+      });
       flashSync(`已导入 ${n} 条进度`);
     } catch (e) {
       flashSync('导入失败：不是有效的进度文件', true);
@@ -417,16 +428,16 @@ async function bootstrap() {
   rows = payload.schools || [];
   rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
   document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
-  await loadProgressFromAPI();
-  if (!accessToken) { showLogin(); return; } // 刷新失败被清空 → 回到登录
+  if (!accessToken && !await doRefresh()) { showLogin(); return; }
+  if (!await loadProgressFromAPI()) throw new Error('progress unavailable');
   updateSyncBadge();
+  applyTheme();
   if (currentUser && userNameEl) userNameEl.textContent = currentUser.username;
   if (userbar) userbar.hidden = false;
   renderStats(); renderFocus(); renderReminder(); render();
 }
 
 async function init() {
-  if (!accessToken) { showLogin(); return; }
   try {
     await bootstrap();
   } catch (e) {

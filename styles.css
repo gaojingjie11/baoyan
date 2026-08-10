@@ -8,6 +8,11 @@
   --p-iv:#d97706;--p-iv-bg:#fef3c7;--p-adw:#7c3aed;--p-adw-bg:#ede9fe;
   --p-adm:#16a34a;--p-adm-bg:#dcfce7;
 }
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f172a;--card:#172033;--text:#e2e8f0;--muted:#94a3b8;--line:#334155;--gray:#cbd5e1;--gray-bg:#1e293b}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"] .stat,:root[data-theme="dark"] .focus-col,:root[data-theme="dark"] .toolbar,:root[data-theme="dark"] .card,:root[data-theme="dark"] .syncbar{background:var(--card);color:var(--text)}
+:root[data-theme="dark"] .toolbar input,:root[data-theme="dark"] .chip,:root[data-theme="dark"] .sync-btn{background:#0f172a;color:var(--text)}
+:root[data-theme="dark"] .college,:root[data-theme="dark"] .focus-item span,:root[data-theme="dark"] .r-school{color:#cbd5e1}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.5}
 .wrap{width:min(1180px,calc(100% - 24px));margin:0 auto}
