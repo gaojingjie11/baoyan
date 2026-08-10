@@ -5,31 +5,71 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0f172a">
   <title>2027 计算机预推免追踪</title>
-  <meta name="description" content="985 / 211 高校计算机及相关方向预推免时间、状态与报名入口追踪">
+  <meta name="description" content="985 / 211 高校计算机及软件方向预推免时间、状态与个人申请进度追踪">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="hero">
     <div class="wrap">
-      <div class="eyebrow">2027 推免申请</div>
+      <div class="eyebrow">2027 推免申请 · 我的追踪器</div>
       <h1>计算机预推免追踪</h1>
-      <p>985 优先 · 211 随后 · 计算机 / 软件 / AI / 网安等相关方向</p>
+      <p>985 优先 · 211 随后 · 软件工程 / 计算机 / 网安 方向</p>
       <div class="updated" id="updated">正在加载数据…</div>
     </div>
   </header>
 
   <main class="wrap">
+    <!-- 我的进度 + 官方紧急度 统计（可点击筛选） -->
     <section class="stats" id="stats"></section>
 
+    <!-- 今日关注：即将截止 / 正在报名 / 我的进行中 -->
+    <section class="focus" id="focus"></section>
+
+    <!-- 工具栏：搜索 + 多维筛选 -->
     <section class="toolbar">
       <input id="search" type="search" placeholder="搜索学校、学院或方向…" autocomplete="off">
-      <div class="filters">
-        <button class="chip active" data-filter-type="all">全部</button>
-        <button class="chip" data-filter-type="985">985</button>
-        <button class="chip" data-filter-type="211">211</button>
-        <button class="chip" data-filter-status="报名中">报名中</button>
-        <button class="chip" data-filter-status="待发布">待发布</button>
-        <button class="chip danger" data-filter-status="已截止">已截止</button>
+
+      <div class="fgroup">
+        <span class="flabel">层次</span>
+        <div class="chips">
+          <button class="chip active" data-group="type" data-value="all">全部</button>
+          <button class="chip" data-group="type" data-value="985">985</button>
+          <button class="chip" data-group="type" data-value="211">211</button>
+        </div>
+      </div>
+
+      <div class="fgroup">
+        <span class="flabel">方向</span>
+        <div class="chips">
+          <button class="chip active" data-group="dir" data-value="all">全部</button>
+          <button class="chip" data-group="dir" data-value="软件工程">软件工程</button>
+          <button class="chip" data-group="dir" data-value="计算机">计算机</button>
+          <button class="chip" data-group="dir" data-value="网安">网安</button>
+          <button class="chip" data-group="dir" data-value="其他">其他</button>
+        </div>
+      </div>
+
+      <div class="fgroup">
+        <span class="flabel">我的进度</span>
+        <div class="chips">
+          <button class="chip active" data-group="prog" data-value="all">全部</button>
+          <button class="chip" data-group="prog" data-value="none">未报名</button>
+          <button class="chip" data-group="prog" data-value="applied">已报名</button>
+          <button class="chip" data-group="prog" data-value="iv">待复试</button>
+          <button class="chip" data-group="prog" data-value="adw">待录取</button>
+          <button class="chip" data-group="prog" data-value="adm">已录取</button>
+        </div>
+      </div>
+
+      <div class="fgroup">
+        <span class="flabel">报名状态</span>
+        <div class="chips">
+          <button class="chip active" data-group="status" data-value="all">全部</button>
+          <button class="chip" data-group="status" data-value="open">报名中</button>
+          <button class="chip" data-group="status" data-value="soon">7天内截止</button>
+          <button class="chip" data-group="status" data-value="待发布">待发布</button>
+          <button class="chip danger" data-group="status" data-value="已截止">已截止</button>
+        </div>
       </div>
     </section>
 
@@ -47,7 +87,7 @@
   </main>
 
   <footer class="wrap footer">
-    时间与政策以高校及学院官方通知为准。
+    进度标记保存在本设备浏览器（localStorage），不会自动同步到其他设备。时间与政策以高校官方通知为准。
   </footer>
 
   <script src="app.js"></script>
