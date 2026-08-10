@@ -8,28 +8,45 @@ server/
 ├── main.go              # Go 后端（标准库 net/http + database/sql，零框架依赖）
 ├── go.mod
 ├── Dockerfile           # 多阶段构建
-├── docker-compose.yml   # Postgres + 后端，一键启动
+├── docker-compose.yml   # 仅后端容器，数据库用你已有的外部 Postgres
+├── .env.example         # 环境变量模板（复制为 .env 填写）
+├── Caddyfile.example    # 反向代理 + 自动 HTTPS 示例
 └── README.md
 ```
 
-## 一、在你服务器上启动（Docker）
+## 一、准备环境变量
+
+复制模板并填入你的 Postgres 连接串：
 
 ```bash
 cd server
-# 可选：设置写入令牌（前端 config.js 里填同样的 token）
-export API_TOKEN="你随便设的一串"
+cp .env.example .env
+# 编辑 .env：
+#   DATABASE_URL=postgres://admin:sdl%40admin@42.193.104.173:5432/baoyan?sslmode=disable
+#   （密码里的 @ 必须写成 %40；库名 baoyan 不存在会自动创建）
+#   API_TOKEN=          # 可选
+```
+> `.env` 已加入 `.gitignore`，不会进仓库，密码安全。
+
+## 二、启动后端（Docker）
+
+```bash
 docker compose up -d --build
 ```
-
-- 数据库：`postgres:16-alpine`，库名/用户/密码均为 `baoyan`，数据持久化在卷 `pgdata`。
-- 后端监听容器 `8080`，已映射到宿主机 `8080`。
-- 表 `progress_store` 会在首次启动时自动创建。
+- 只起 `api` 一个容器；数据库用你外部已有的 Postgres（上面 DATABASE_URL 指向它）。
+- 若 `baoyan` 库不存在，后端启动时会自动 `CREATE DATABASE baoyan`。
+- 后端监听 `8080`，映射到宿主机 `8080`。
+- 表 `progress_store` 首次启动自动创建。
 
 验证：
 ```bash
 curl http://localhost:8080/api/health          # {"ok":true}
 curl http://localhost:8080/api/progress         # {}  （初始为空）
 ```
+
+> 若后端容器和 Postgres 在同一台服务器、连 `42.193.104.173` 不通，
+> 可在 docker-compose.yml 的 api 下加 `network_mode: host`，并把 DATABASE_URL 主机改成 `localhost`。
+
 
 ## 二、让外网能访问（必须 HTTPS）
 

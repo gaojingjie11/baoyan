@@ -6,11 +6,12 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -30,6 +31,7 @@ func main() {
 		log.Fatalf("打开数据库失败: %v", err)
 	}
 	db.SetMaxOpenConns(10)
+	ensureDatabase(dbURL)
 
 	// 等待数据库就绪（docker-compose 里 db 可能稍慢）
 	for i := 0; i < 15; i++ {
@@ -156,6 +158,39 @@ func corsMiddleware(origins []string, next http.Handler) http.Handler {
 func checkToken(r *http.Request, token string) bool {
 	h := strings.TrimSpace(r.Header.Get("Authorization"))
 	return h == "Bearer "+token || h == token
+}
+
+// ensureDatabase 若目标库不存在，则连接到默认 postgres 库并自动创建，方便空 PG 直接跑
+func ensureDatabase(target string) {
+	u, err := url.Parse(target)
+	if err != nil {
+		return
+	}
+	name := strings.TrimPrefix(u.Path, "/")
+	if name == "" {
+		return
+	}
+	b := *u
+	b.Path = "/postgres"
+	bdb, err := sql.Open("postgres", b.String())
+	if err != nil {
+		return
+	}
+	defer bdb.Close()
+	if err = bdb.Ping(); err != nil {
+		return // 没有 postgres 默认库可引导，依赖目标库已存在
+	}
+	var exists bool
+	if err = bdb.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname=$1)", name).Scan(&exists); err != nil {
+		return
+	}
+	if !exists {
+		if _, err = bdb.Exec("CREATE DATABASE " + pq.QuoteIdentifier(name)); err != nil {
+			log.Printf("自动建库失败，请手动执行 CREATE DATABASE %s ：%v", name, err)
+		} else {
+			log.Printf("已自动创建数据库 %s", name)
+		}
+	}
 }
 
 func getenv(k, def string) string {

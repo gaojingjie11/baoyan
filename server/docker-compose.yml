@@ -1,35 +1,12 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: baoyan
-      POSTGRES_PASSWORD: baoyan
-      POSTGRES_DB: baoyan
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U baoyan -d baoyan"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
   api:
     build: .
-    depends_on:
-      db:
-        condition: service_healthy
+    # 数据库用你自己已有的 Postgres（见 .env 里的 DATABASE_URL），不再内置 db 容器
     environment:
       PORT: "8080"
-      # 容器内用服务名 db 访问；sslmode=disable 因为是内网
-      DATABASE_URL: "postgres://baoyan:baoyan@db:5432/baoyan?sslmode=disable"
-      # 允许调用的前端源（Vercel 域名），逗号分隔可写多个
+      DATABASE_URL: "${DATABASE_URL}"
       CORS_ORIGIN: "https://baoyan-one.vercel.app"
-      # 可选：设置了则 POST 必须带 Authorization: Bearer <token>
       API_TOKEN: "${API_TOKEN:-}"
     ports:
       - "8080:8080"
     restart: unless-stopped
-
-volumes:
-  pgdata:
