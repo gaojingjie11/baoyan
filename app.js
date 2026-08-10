@@ -208,7 +208,7 @@ function dirRank(d) { return DIR_RANK[d] !== undefined ? DIR_RANK[d] : 3; }
 /* 排序键：985/211 内，截止越近越前，时间不清的越后 */
 function sortKey(r) {
   const st = stateOf(r);
-  const tie = dirRank(r.direction) * 1e9 + r.id;
+  const tie = dirRank(r.direction) * 1e9 + (Number(r.id) || 0);
   if (!st.end) return 2e18 + tie;
   const endMs = st.end.getTime();
   if (st.key === 'closed') return 1e18 + endMs;
@@ -423,12 +423,13 @@ document.querySelector('#file-import').addEventListener('change', e => {
 
 /* ---------- 初始化 ---------- */
 async function bootstrap() {
-  const res = await fetch('./schools.json', { cache: 'no-store' });
+  if (!accessToken && !await doRefresh()) { showLogin(); return; }
+  const res = await apiFetch('/schools', { cache: 'no-store' });
+  if (!res.ok) throw new Error('schools unavailable');
   const payload = await res.json();
   rows = payload.schools || [];
   rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
   document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
-  if (!accessToken && !await doRefresh()) { showLogin(); return; }
   if (!await loadProgressFromAPI()) throw new Error('progress unavailable');
   updateSyncBadge();
   applyTheme();

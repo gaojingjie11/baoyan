@@ -4,7 +4,7 @@
 
 ## 日常维护
 
-- 学校目录：编辑 `schools.json`。
+- 学校目录：编辑 `schools.json`；部署时 API 会自动导入 PostgreSQL 的 `schools` 表。
 - 前端：`index.html`、`styles.css`、`app.js`。
 - 后端：`server/`。
 - 发布：推送 `main` 后 GitHub Actions 在服务器执行 `sudo /opt/baoyan/server/deploy.sh`。

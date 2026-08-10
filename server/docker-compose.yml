@@ -5,11 +5,13 @@ services:
       PORT: "8080"
       DATABASE_URL: "${DATABASE_URL:?DATABASE_URL is required}"
       JWT_SECRET: "${JWT_SECRET:?JWT_SECRET is required}"
-      PASSWORD_PEPPER: "${PASSWORD_PEPPER:?PASSWORD_PEPPER is required}"
+      PASSWORD_PEPPER: "${PASSWORD_PEPPER:-}"
       BOOTSTRAP_USERNAME: "${BOOTSTRAP_USERNAME:-}"
       BOOTSTRAP_PASSWORD: "${BOOTSTRAP_PASSWORD:-}"
     ports:
       - "127.0.0.1:2026:8080"
+    volumes:
+      - ../schools.json:/app/schools.json:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]

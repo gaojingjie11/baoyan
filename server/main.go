@@ -8,11 +8,12 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 var validStatus = map[string]bool{"": true, "applied": true, "iv": true, "adw": true, "adm": true}
@@ -230,6 +231,7 @@ func (a *app) migrate(ctx context.Context) error {
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, theme_config JSONB NOT NULL DEFAULT '{"theme":"system"}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS theme_config JSONB NOT NULL DEFAULT '{"theme":"system"}'::jsonb`,
+		`CREATE TABLE IF NOT EXISTS schools (id TEXT PRIMARY KEY, school TEXT NOT NULL, tier TEXT NOT NULL, college TEXT NOT NULL, direction TEXT NOT NULL, major TEXT NOT NULL, start_text TEXT NOT NULL, end_text TEXT NOT NULL, status TEXT NOT NULL, site TEXT NOT NULL, admit TEXT NOT NULL, source TEXT NOT NULL, remark TEXT NOT NULL, source_updated_at TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
 		`CREATE TABLE IF NOT EXISTS progress (id SERIAL PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, school_id TEXT NOT NULL, status TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), UNIQUE(user_id, school_id))`,
 		`CREATE TABLE IF NOT EXISTS refresh_tokens (token_hash BYTEA PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, revoked_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
 		`CREATE INDEX IF NOT EXISTS refresh_tokens_family_id_idx ON refresh_tokens(family_id)`,
@@ -260,10 +262,43 @@ func (a *app) bootstrap(ctx context.Context) error {
 	return err
 }
 
+func ensureDatabase(target string) error {
+	u, err := url.Parse(target)
+	if err != nil {
+		return err
+	}
+	name := strings.TrimPrefix(u.Path, "/")
+	if name == "" || name == "postgres" {
+		return nil
+	}
+	bootstrapURL := *u
+	bootstrapURL.Path = "/postgres"
+	bootstrapDB, err := sql.Open("postgres", bootstrapURL.String())
+	if err != nil {
+		return err
+	}
+	defer bootstrapDB.Close()
+	if err := bootstrapDB.Ping(); err != nil {
+		return err
+	}
+	var exists bool
+	if err := bootstrapDB.QueryRow(`SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname=$1)`, name).Scan(&exists); err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+	_, err = bootstrapDB.Exec("CREATE DATABASE " + pq.QuoteIdentifier(name))
+	return err
+}
+
 func main() {
 	dbURL, jwtSecret := os.Getenv("DATABASE_URL"), os.Getenv("JWT_SECRET")
-	if dbURL == "" || len(jwtSecret) < 32 || os.Getenv("PASSWORD_PEPPER") == "" {
-		log.Fatal("DATABASE_URL, JWT_SECRET (32+ bytes), and PASSWORD_PEPPER are required")
+	if dbURL == "" || len(jwtSecret) < 32 {
+		log.Fatal("DATABASE_URL and JWT_SECRET (32+ bytes) are required")
+	}
+	if err := ensureDatabase(dbURL); err != nil {
+		log.Fatalf("ensure database: %v", err)
 	}
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -279,11 +314,26 @@ func main() {
 	if err := a.migrate(ctx); err != nil {
 		log.Fatalf("migrate database: %v", err)
 	}
+	if err := a.syncSchools(ctx); err != nil {
+		log.Fatalf("sync schools: %v", err)
+	}
+	if err := a.ensureProgressSchoolForeignKey(ctx); err != nil {
+		log.Fatalf("constrain progress: %v", err)
+	}
 	if err := a.bootstrap(ctx); err != nil {
 		log.Fatalf("bootstrap user: %v", err)
 	}
+	if os.Getenv("MIGRATE_ONLY") == "1" {
+		var schools, users, progress, sessions int
+		if err := db.QueryRow(`SELECT (SELECT count(*) FROM schools), (SELECT count(*) FROM users), (SELECT count(*) FROM progress), (SELECT count(*) FROM refresh_tokens)`).Scan(&schools, &users, &progress, &sessions); err != nil {
+			log.Fatalf("count migrated data: %v", err)
+		}
+		log.Printf("migration complete schools=%d users=%d progress=%d refresh_tokens=%d", schools, users, progress, sessions)
+		return
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/health", method(http.MethodGet, func(w http.ResponseWriter, _ *http.Request) { writeJSON(w, http.StatusOK, map[string]bool{"ok": true}) }))
+	mux.HandleFunc("/api/schools", method(http.MethodGet, a.schoolsHandler))
 	mux.HandleFunc("/api/auth/login", method(http.MethodPost, a.loginHandler))
 	mux.HandleFunc("/api/auth/refresh", method(http.MethodPost, a.refreshHandler))
 	mux.HandleFunc("/api/auth/logout", method(http.MethodPost, a.logoutHandler))
