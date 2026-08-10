@@ -24,8 +24,51 @@ function getProgress(id) { return progressMap[id] || ''; }
 function setProgress(id, val) {
   if (val) progressMap[id] = val; else delete progressMap[id];
   try { localStorage.setItem(LS_KEY, JSON.stringify(progressMap)); } catch (e) {}
+  saveProgressToAPI();
 }
 function progressMeta(key) { return PROGRESS.find(p => p.key === key) || PROGRESS[0]; }
+
+/* ---------- 后端同步（Go + Postgres，自托管） ---------- */
+const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
+const API_TOKEN = window.BAOYAN_API_TOKEN || '';
+
+async function loadProgressFromAPI() {
+  if (!API_BASE) return false;
+  try {
+    const res = await fetch(API_BASE + '/api/progress', { cache: 'no-store' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data && typeof data === 'object') {
+      progressMap = data;
+      try { localStorage.setItem(LS_KEY, JSON.stringify(progressMap)); } catch (e) {}
+      return true;
+    }
+  } catch (e) { /* 离线或后端不可达 → 退回本机存储 */ }
+  return false;
+}
+async function saveProgressToAPI() {
+  if (!API_BASE) return;
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (API_TOKEN) headers['Authorization'] = 'Bearer ' + API_TOKEN;
+    await fetch(API_BASE + '/api/progress', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(progressMap),
+    });
+  } catch (e) { /* 保存失败静默忽略，本机已有缓存 */ }
+}
+function updateSyncBadge() {
+  const tip = document.querySelector('.sync-tip');
+  if (!tip) return;
+  if (API_BASE) {
+    tip.innerHTML = '已连接后端 · 进度自动同步到手机 / 电脑（本机也有缓存）';
+    tip.classList.add('ok');
+  } else {
+    tip.innerHTML = '进度仅存本设备 · 换设备前先「导出」，到新设备「导入」';
+    tip.classList.remove('ok');
+  }
+}
 
 /* ---------- 时间与官方报名状态 ---------- */
 function todayCN() {
@@ -222,6 +265,58 @@ list.addEventListener('change', e => {
 
 search.addEventListener('input', render);
 
+/* ---------- 进度导出 / 导入（跨设备同步，无需后端） ---------- */
+function exportProgress() {
+  const blob = new Blob([JSON.stringify(progressMap, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  a.href = url;
+  a.download = `baoyan-progress-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  flashSync(`已导出 ${Object.keys(progressMap).length} 条进度`);
+}
+function importProgress(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (typeof data !== 'object' || !data) throw new Error('格式不对');
+      let n = 0;
+      Object.keys(data).forEach(id => {
+        const v = data[id];
+        if (PROGRESS.some(p => p.key === v)) { progressMap[id] = v; n++; }
+      });
+      localStorage.setItem(LS_KEY, JSON.stringify(progressMap));
+      renderStats(); renderFocus(); render(); saveProgressToAPI();
+      flashSync(`已导入 ${n} 条进度`);
+    } catch (e) {
+      flashSync('导入失败：不是有效的进度文件', true);
+    }
+  };
+  reader.readAsText(file);
+}
+let syncTimer = null;
+function flashSync(msg, isErr) {
+  const tip = document.querySelector('.sync-tip');
+  if (!tip) return;
+  tip.textContent = msg;
+  tip.classList.toggle('err', !!isErr);
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    tip.textContent = '进度仅存本设备 · 换设备前先「导出」，到新设备「导入」';
+    tip.classList.remove('err');
+  }, 2600);
+}
+document.querySelector('#btn-export').addEventListener('click', exportProgress);
+document.querySelector('#btn-import').addEventListener('click', () => document.querySelector('#file-import').click());
+document.querySelector('#file-import').addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) importProgress(e.target.files[0]);
+  e.target.value = '';
+});
+
 /* ---------- 初始化 ---------- */
 async function init() {
   try {
@@ -230,6 +325,8 @@ async function init() {
     rows = payload.schools || [];
     rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
     document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
+    await loadProgressFromAPI();
+    updateSyncBadge();
     renderStats(); renderFocus(); renderReminder(); render();
   } catch (e) {
     document.querySelector('#updated').textContent = '数据加载失败';

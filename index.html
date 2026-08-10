@@ -22,6 +22,16 @@
     <!-- 我的进度 + 官方紧急度 统计（可点击筛选） -->
     <section class="stats" id="stats"></section>
 
+    <!-- 进度同步：导出/导入（跨设备共享，无需后端） -->
+    <section class="syncbar">
+      <span class="sync-tip">进度仅存本设备 · 换设备前先「导出」，到新设备「导入」</span>
+      <div class="sync-btns">
+        <button id="btn-export" class="sync-btn">⬇ 导出进度</button>
+        <button id="btn-import" class="sync-btn">⬆ 导入进度</button>
+        <input id="file-import" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+
     <!-- 今日关注：即将截止 / 正在报名 / 我的进行中 -->
     <section class="focus" id="focus"></section>
 
@@ -90,6 +100,7 @@
     进度标记保存在本设备浏览器（localStorage），不会自动同步到其他设备。时间与政策以高校官方通知为准。
   </footer>
 
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
