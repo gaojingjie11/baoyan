@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>2027 计算机预推免追踪</title>
+  <meta name="description" content="985 / 211 高校计算机及相关方向预推免时间、状态与报名入口追踪">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">2027 推免申请</div>
+      <h1>计算机预推免追踪</h1>
+      <p>985 优先 · 211 随后 · 计算机 / 软件 / AI / 网安等相关方向</p>
+      <div class="updated" id="updated">正在加载数据…</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="stats" id="stats"></section>
+
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="搜索学校、学院或方向…" autocomplete="off">
+      <div class="filters">
+        <button class="chip active" data-filter-type="all">全部</button>
+        <button class="chip" data-filter-type="985">985</button>
+        <button class="chip" data-filter-type="211">211</button>
+        <button class="chip" data-filter-status="报名中">报名中</button>
+        <button class="chip" data-filter-status="待发布">待发布</button>
+        <button class="chip danger" data-filter-status="已截止">已截止</button>
+      </div>
+    </section>
+
+    <section class="legend">
+      <span><i class="dot open"></i>报名中</span>
+      <span><i class="dot soon"></i>7天内截止</span>
+      <span><i class="dot closed"></i>已截止</span>
+      <span><i class="dot pending"></i>待发布</span>
+    </section>
+
+    <section id="reminder" class="reminder" hidden></section>
+
+    <section id="list" class="cards"></section>
+    <div id="empty" class="empty" hidden>没有匹配结果</div>
+  </main>
+
+  <footer class="wrap footer">
+    时间与政策以高校及学院官方通知为准。
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
