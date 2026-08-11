@@ -11,7 +11,7 @@ git -C "$APP_DIR" pull --ff-only
 install -d -m 0755 "$WEB_DIR"
 rsync -a --delete --exclude=.git --exclude=server --exclude=.github "$APP_DIR/" "$WEB_DIR/"
 cd "$APP_DIR/server"
-docker compose --env-file "$ENV_FILE" up -d --build --remove-orphans
+docker compose --env-file "$ENV_FILE" up -d --build --remove-orphans --force-recreate
 curl -fsS http://127.0.0.1:2026/api/health >/dev/null
 
 # 只在新版本健康后清理：保留近 7 天的构建缓存，删除无引用旧镜像。
