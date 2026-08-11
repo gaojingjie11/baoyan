@@ -10,10 +10,13 @@ test -f "$ENV_FILE" || { echo "missing $ENV_FILE" >&2; exit 1; }
 # 自更新后重新执行本脚本：git pull 会改写 deploy.sh 自身，而 bash 执行中已缓冲旧内容，
 # 不重新 exec 就会继续跑过期的脚本（曾导致旧的单次 curl 误报 curl 56）。
 if [ "${_BAOYAN_PULLED:-}" != "1" ]; then
-  git -C "$APP_DIR" pull --ff-only
+  git -C "$APP_DIR" fetch origin
+  git -C "$APP_DIR" checkout main
+  git -C "$APP_DIR" reset --hard origin/main
   _BAOYAN_PULLED=1 exec "$0" "$@"
 fi
 install -d -m 0755 "$WEB_DIR"
+echo "deploying commit: $(git -C "$APP_DIR" rev-parse --short HEAD)  $(git -C "$APP_DIR" log -1 --pretty=%s)"
 rsync -a --delete --exclude=.git --exclude=server --exclude=.github "$APP_DIR/" "$WEB_DIR/"
 cd "$APP_DIR/server"
 docker compose --env-file "$ENV_FILE" up -d --build --remove-orphans --force-recreate
