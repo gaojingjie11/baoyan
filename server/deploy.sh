@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy the checked-out main branch. Run this script only on the application server.
+# Deploy the application that has already been synced to /opt/baoyan.
+# Run this script only on the application server.
 set -euo pipefail
 
 APP_DIR=/opt/baoyan
@@ -7,17 +8,13 @@ WEB_DIR=/var/www/baoyan
 ENV_FILE=/etc/baoyan/baoyan.env
 
 test -f "$ENV_FILE" || { echo "missing $ENV_FILE" >&2; exit 1; }
-# 自更新后重新执行本脚本：git pull 会改写 deploy.sh 自身，而 bash 执行中已缓冲旧内容，
-# 不重新 exec 就会继续跑过期的脚本（曾导致旧的单次 curl 误报 curl 56）。
-if [ "${_BAOYAN_PULLED:-}" != "1" ]; then
-  git -C "$APP_DIR" fetch origin
-  git -C "$APP_DIR" checkout main
-  git -C "$APP_DIR" reset --hard origin/main
-  _BAOYAN_PULLED=1 exec "$0" "$@"
-fi
+
+echo "deploying commit: $(git -C "$APP_DIR" rev-parse --short HEAD 2>/dev/null || echo 'not-a-repo')  $(git -C "$APP_DIR" log -1 --pretty=%s 2>/dev/null || echo 'unknown')"
+
 install -d -m 0755 "$WEB_DIR"
-echo "deploying commit: $(git -C "$APP_DIR" rev-parse --short HEAD)  $(git -C "$APP_DIR" log -1 --pretty=%s)"
+# 前端静态资源同步到 nginx root；排除后端代码、git 元数据、CI 配置
 rsync -a --delete --exclude=.git --exclude=server --exclude=.github "$APP_DIR/" "$WEB_DIR/"
+
 cd "$APP_DIR/server"
 docker compose --env-file "$ENV_FILE" up -d --build --remove-orphans --force-recreate
 

@@ -32,6 +32,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           printf '%s\n' "$KNOWN_HOSTS" >> ~/.ssh/known_hosts
 
+      - name: Sync checked-out code to server
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: |
+          set -e
+          # 直接从 GitHub Actions 已 checkout 的代码同步到服务器，避免依赖服务器本地 git 状态
+          rsync -avz --delete --exclude=.git --exclude=.github ./ "$USER@$HOST:/opt/baoyan/"
+
       - name: Deploy checked-out main branch
         env:
           HOST: ${{ secrets.SERVER_HOST }}
