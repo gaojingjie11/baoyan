@@ -426,7 +426,7 @@ document.querySelector('#file-import').addEventListener('change', e => {
 async function bootstrap() {
   if (!accessToken && !await doRefresh()) { showLogin(); return; }
   // 拉学校：优先 /api/schools（后端），失败则回退本地 schools.json，保证列表始终可见
-  let rows = [];
+  rows = [];
   let updatedAt = '';
   try {
     const res = await apiFetch('/schools', { cache: 'no-store' });
