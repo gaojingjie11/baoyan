@@ -7,7 +7,12 @@ WEB_DIR=/var/www/baoyan
 ENV_FILE=/etc/baoyan/baoyan.env
 
 test -f "$ENV_FILE" || { echo "missing $ENV_FILE" >&2; exit 1; }
-git -C "$APP_DIR" pull --ff-only
+# 自更新后重新执行本脚本：git pull 会改写 deploy.sh 自身，而 bash 执行中已缓冲旧内容，
+# 不重新 exec 就会继续跑过期的脚本（曾导致旧的单次 curl 误报 curl 56）。
+if [ "${_BAOYAN_PULLED:-}" != "1" ]; then
+  git -C "$APP_DIR" pull --ff-only
+  _BAOYAN_PULLED=1 exec "$0" "$@"
+fi
 install -d -m 0755 "$WEB_DIR"
 rsync -a --delete --exclude=.git --exclude=server --exclude=.github "$APP_DIR/" "$WEB_DIR/"
 cd "$APP_DIR/server"
