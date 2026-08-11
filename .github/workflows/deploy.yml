@@ -32,12 +32,20 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           printf '%s\n' "$KNOWN_HOSTS" >> ~/.ssh/known_hosts
 
-      - name: Sync checked-out code to server
+      - name: Stamp cache buster and sync to server
         env:
           HOST: ${{ secrets.SERVER_HOST }}
           USER: ${{ secrets.SERVER_USER }}
         run: |
           set -e
+          # 用当前 commit 短 hash 作为静态资源版本戳，确保每次部署后浏览器重新加载 JS/CSS
+          CACHE_TAG="${GITHUB_SHA:0:7}"
+          sed -i.bak \
+            -e "s|src=\"app\.js\"|src=\"app.js?v=${CACHE_TAG}\"|g" \
+            -e "s|src=\"config\.js\"|src=\"config.js?v=${CACHE_TAG}\"|g" \
+            -e "s|href=\"styles\.css\"|href=\"styles.css?v=${CACHE_TAG}\"|g" \
+            index.html
+          rm -f index.html.bak
           # 直接从 GitHub Actions 已 checkout 的代码同步到服务器，避免依赖服务器本地 git 状态
           rsync -avz --delete --exclude=.git --exclude=.github ./ "$USER@$HOST:/opt/baoyan/"
 
