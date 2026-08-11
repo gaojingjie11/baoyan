@@ -12,7 +12,25 @@ install -d -m 0755 "$WEB_DIR"
 rsync -a --delete --exclude=.git --exclude=server --exclude=.github "$APP_DIR/" "$WEB_DIR/"
 cd "$APP_DIR/server"
 docker compose --env-file "$ENV_FILE" up -d --build --remove-orphans --force-recreate
-curl -fsS http://127.0.0.1:2026/api/health >/dev/null
+
+# 等待后端就绪：轮询 /api/health，最多 ~90s（冷启动 + 远程 PG 同步 138 行有延迟）。
+# 避免单次 curl 在端口尚未监听时命中 docker-proxy 的 RST，造成误报失败（curl 56）。
+HEALTH_URL="http://127.0.0.1:2026/api/health"
+ready=0
+for i in $(seq 1 45); do
+  if curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
+    ready=1
+    echo "backend healthy after ${i} try(ies)"
+    break
+  fi
+  sleep 2
+done
+
+if [ "$ready" -ne 1 ]; then
+  echo "backend did not become healthy within timeout; dumping container logs:" >&2
+  docker compose logs --no-color --tail=120 api >&2 || true
+  exit 1
+fi
 
 # 只在新版本健康后清理：保留近 7 天的构建缓存，删除无引用旧镜像。
 docker image prune -f
