@@ -425,12 +425,28 @@ document.querySelector('#file-import').addEventListener('change', e => {
 /* ---------- 初始化 ---------- */
 async function bootstrap() {
   if (!accessToken && !await doRefresh()) { showLogin(); return; }
-  const res = await apiFetch('/schools', { cache: 'no-store' });
-  if (!res.ok) throw new Error('schools unavailable');
-  const payload = await res.json();
-  rows = payload.schools || [];
-  rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
-  document.querySelector('#updated').textContent = `数据更新：${payload.updated_at || '未注明'}`;
+  // 拉学校：优先 /api/schools（后端），失败则回退本地 schools.json，保证列表始终可见
+  let rows = [];
+  let updatedAt = '';
+  try {
+    const res = await apiFetch('/schools', { cache: 'no-store' });
+    if (!res.ok) throw new Error('bad status');
+    const payload = await res.json();
+    rows = payload.schools || [];
+    updatedAt = payload.updated_at || '';
+  } catch (e) {
+    try {
+      const res = await fetch('schools.json', { cache: 'no-store' });
+      if (res.ok) {
+        const payload = await res.json();
+        rows = payload.schools || [];
+        updatedAt = payload.updated_at || '';
+      }
+    } catch (_) { /* 忽略 */ }
+  }
+  if (!rows.length) throw new Error('schools unavailable');
+  rows.sort((a, b) => typeRank(a.type) - typeRank(a.type) || sortKey(a) - sortKey(b));
+  document.querySelector('#updated').textContent = `数据更新：${updatedAt || '未注明'}`;
   if (!await loadProgressFromAPI()) throw new Error('progress unavailable');
   updateSyncBadge();
   applyTheme();
