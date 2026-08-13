@@ -352,6 +352,16 @@ document.querySelectorAll('.chip[data-group]').forEach(btn => btn.addEventListen
   setFilter(btn.dataset.group, btn.dataset.value);
 }));
 
+function resetFilters() {
+  search.value = '';
+  filters = { type: 'all', dir: 'all', prog: 'all', status: 'all' };
+  document.querySelectorAll('.chip[data-group]').forEach(x => {
+    x.classList.toggle('active', x.dataset.value === 'all');
+  });
+  render();
+}
+document.querySelector('#btn-reset-filters').addEventListener('click', resetFilters);
+
 /* ---------- 进度下拉 ---------- */
 list.addEventListener('change', e => {
   const sel = e.target.closest('select.progress');

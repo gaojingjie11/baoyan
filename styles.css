@@ -62,6 +62,12 @@ h1{font-size:30px;margin:0 0 8px}
 .chip.active{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;font-weight:650}
 .chip.danger.active{background:var(--red-bg);color:var(--red);border-color:#fecaca}
 
+/* ---------- 重置筛选 ---------- */
+.reset-row{justify-content:flex-start;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.reset-btn{border:none;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:10px;font:inherit;transition:background .12s,color .12s}
+.reset-btn:hover{background:#f1f5f9;color:#334155}
+:root[data-theme="dark"] .reset-btn:hover{background:#1e293b;color:#e2e8f0}
+
 /* ---------- 进度同步条 ---------- */
 .syncbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#f8fafc;border:1px dashed var(--line);border-radius:14px;padding:10px 14px;margin:14px 0}
 .sync-tip{font-size:12.5px;color:var(--muted);flex:1 1 200px;min-width:0}
