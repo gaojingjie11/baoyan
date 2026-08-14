@@ -186,8 +186,8 @@ function stateOf(r) {
   if (r.status === '已截止') return { key: 'closed', label: '已截止', end };
   if (r.status === '待发布') return { key: 'pending', label: '待发布', end };
   if (end) {
+    if (end <= now) return { key: 'closed', label: '已截止', end };
     const days = Math.ceil((end - now) / 86400000);
-    if (days < 0) return { key: 'closed', label: '已截止', end };
     if (days <= 7) return { key: 'soon', label: `${days}天内截止`, end };
   }
   return { key: 'open', label: '报名中', end };
@@ -251,7 +251,7 @@ function renderFocus() {
   focus.innerHTML =
     col('⏰ 即将截止', 'f-soon', soon, r => {
       const p = countdownParts(parseEnd(r.end)?.getTime());
-      return `<div class="focus-item"><span>${esc(r.school)}</span><b>${p ? p.text : '已结束'}</b></div>`;
+      return `<div class="focus-item"><span>${esc(r.school)}</span><b>${p && !p.done ? p.text : '已结束'}</b></div>`;
     }) +
     col('🟢 正在报名', 'f-open', open, r => `<div class="focus-item"><span>${esc(r.school)}</span><b>${esc(r.direction)}</b></div>`) +
     col('📌 我的进行中', 'f-mine', mine, r => `<div class="focus-item"><span>${esc(r.school)}</span><b>${progressMeta(getProgress(r.id)).label}</b></div>`);
