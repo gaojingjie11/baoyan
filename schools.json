@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-18",
+  "updated_at": "2026-08-19",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。direction 为自动推断可手动改。",
   "schools": [
     {
@@ -114,7 +114,7 @@
       "direction": "计算机",
       "start": "2026-08-01 00:00",
       "end": "2026-08-18 17:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yjszs.muc.edu.cn",
       "admit": "学硕/专硕/直博",
       "source": "https://xingong.muc.edu.cn/info/1041/6425.htm",
