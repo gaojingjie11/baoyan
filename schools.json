@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-19",
+  "updated_at": "2026-08-21",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。direction 为自动推断可手动改。",
   "schools": [
     {
@@ -172,13 +172,13 @@
       "type": "985",
       "college": "计算机科学与工程学院",
       "direction": "计算机",
-      "start": "待发布",
-      "end": "待发布",
-      "status": "待发布",
-      "site": "待官方公告",
+      "start": "2026-07-17",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://yz.neu.edu.cn/",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
+      "source": "http://yz.neu.edu.cn/2026/0720/c5932a458191/pagem.htm",
+      "remark": "东北大学计算机科学与工程学院2027年推免预报名（2026-07-17 ~ 2026-09-14），来源：东北大学2027年接收推荐免试研究生工作办法（学院预报名系统详情页）",
       "id": 11,
       "major": ""
     },
@@ -1854,7 +1854,7 @@
       "direction": "软件工程",
       "start": "2026-07-31",
       "end": "2026-08-20 10:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://enroll.sysu.edu.cn/",
       "admit": "学硕/专硕/直博",
       "source": "https://sse.sysu.edu.cn/article/1088",
