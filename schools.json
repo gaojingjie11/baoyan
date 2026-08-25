@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-24",
+  "updated_at": "2026-08-25",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。direction 为自动推断可手动改。",
   "schools": [
     {
@@ -204,7 +204,7 @@
       "direction": "计算机",
       "start": "2026-07-26",
       "end": "2026-08-24",
-      "status": "报名中",
+      "status": "已截止",
       "site": "http://yzb.hit.edu.cn",
       "admit": "学硕/专硕/直博",
       "source": "https://www.cs.hit.edu.cn/2026/0726/c11271a398409/page.htm",
@@ -1434,7 +1434,7 @@
       "direction": "人工智能",
       "start": "2026-08-04",
       "end": "2026-08-24 12:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "http://yzxt.nankai.edu.cn/intern/frontend/web/",
       "admit": "学硕/专硕/直博",
       "source": "https://ai.nankai.edu.cn/info/1024/6632.htm",
@@ -1494,7 +1494,7 @@
       "direction": "软件工程",
       "start": "2026-07-26",
       "end": "2026-08-24",
-      "status": "报名中",
+      "status": "已截止",
       "site": "http://yzb.hit.edu.cn",
       "admit": "学硕/专硕/直博",
       "source": "https://www.cs.hit.edu.cn/2026/0726/c11271a398409/page.htm",
@@ -1509,7 +1509,7 @@
       "direction": "网安",
       "start": "2026-07-26",
       "end": "2026-08-24",
-      "status": "报名中",
+      "status": "已截止",
       "site": "http://yzb.hit.edu.cn",
       "admit": "学硕/专硕/直博",
       "source": "https://www.cs.hit.edu.cn/2026/0726/c11271a398409/page.htm",
