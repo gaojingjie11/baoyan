@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-26",
+  "updated_at": "2026-08-27",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。direction 为自动推断可手动改。",
   "schools": [
     {
@@ -787,13 +787,13 @@
       "type": "211",
       "college": "计算机科学与技术学院",
       "direction": "计算机",
-      "start": "待发布",
-      "end": "待发布",
-      "status": "待发布",
-      "site": "待官方公告",
+      "start": "2026-08-20",
+      "end": "2026-09-18 17:00",
+      "status": "报名中",
+      "site": "中国矿业大学接收推荐免试研究生预报名系统 https://yzs.cumt.edu.cn/yzbm/logon",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
+      "source": "https://yz.cumt.edu.cn/nry_zinfo.jsp?urltype=news.NewsContentUrl&wbnewsid=2593&wbtreeid=1003",
+      "remark": "全校统一2027推免生预报名系统开放时段(2026-08-20至2026-09-18 17:00)，计算机科学与技术学院具体以系统设置为准",
       "id": 52,
       "major": ""
     },
