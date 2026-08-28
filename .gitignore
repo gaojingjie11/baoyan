@@ -3,3 +3,7 @@
 .vercel
 .env
 .worktrees/
+# WorkBuddy 项目记忆目录
+.workbuddy/
+# Go 编译产物
+server/baoyan-server
