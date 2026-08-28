@@ -28,6 +28,7 @@ const (
 )
 
 var errUnauthorized = errors.New("unauthorized")
+var errUserExists = errors.New("user exists")
 
 type app struct {
 	db            *sql.DB
@@ -222,6 +223,35 @@ func (a *app) login(ctx context.Context, username, password, major string) (sess
 		return session{}, err
 	}
 	return s, nil
+}
+
+// register 创建新账号。密码由服务器用自身 pepper 做 Argon2id 哈希，调用方永远拿不到明文 pepper。
+// major 非法时回退默认专业。用户名已存在返回 errUserExists。
+func (a *app) register(ctx context.Context, username, password, major string) (userPublic, error) {
+	username = strings.TrimSpace(username)
+	if len(username) == 0 || len(username) > 64 || len(password) == 0 || len(password) > 256 {
+		return userPublic{}, errors.New("invalid credentials")
+	}
+	var dummy int
+	if err := a.db.QueryRowContext(ctx, `SELECT 1 FROM users WHERE username=$1`, username).Scan(&dummy); err == nil {
+		return userPublic{}, errUserExists
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return userPublic{}, err
+	}
+	hash, err := hashPassword(password, a.pepper)
+	if err != nil {
+		return userPublic{}, err
+	}
+	mj := normalizeMajor(major)
+	if mj == "" {
+		mj = defaultMajor
+	}
+	var id int
+	var theme json.RawMessage
+	if err := a.db.QueryRowContext(ctx, `INSERT INTO users(username, password_hash, major) VALUES($1,$2,$3) RETURNING id, theme_config`, username, hash, mj).Scan(&id, &theme); err != nil {
+		return userPublic{}, err
+	}
+	return userPublic{ID: id, Username: username, Theme: theme, Major: mj}, nil
 }
 
 func (a *app) refresh(ctx context.Context, raw string) (session, error) {

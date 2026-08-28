@@ -72,6 +72,33 @@ func (a *app) loginHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"access_token": s.AccessToken, "expires_in": int(accessTTL.Seconds()), "user": s.User})
 }
 
+func (a *app) registerHandler(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Major    string `json:"major"`
+	}
+	if err := readJSON(r, &body); err != nil || len(body.Username) == 0 || len(body.Username) > 64 || len(body.Password) == 0 || len(body.Password) > 256 {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid credentials"})
+		return
+	}
+	if body.Major != "" && normalizeMajor(body.Major) == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid major"})
+		return
+	}
+	u, err := a.register(r.Context(), body.Username, body.Password, normalizeMajor(body.Major))
+	if errors.Is(err, errUserExists) {
+		writeJSON(w, http.StatusConflict, map[string]string{"error": "用户名已存在"})
+		return
+	}
+	if err != nil {
+		log.Printf("register failed: %v", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "server error"})
+		return
+	}
+	writeJSON(w, http.StatusCreated, u)
+}
+
 func (a *app) refreshHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("baoyan_refresh")
 	raw := ""
@@ -369,6 +396,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/health", method(http.MethodGet, func(w http.ResponseWriter, _ *http.Request) { writeJSON(w, http.StatusOK, map[string]bool{"ok": true}) }))
 	mux.HandleFunc("/api/schools", method(http.MethodGet, a.schoolsHandler))
+	mux.HandleFunc("/api/auth/register", method(http.MethodPost, a.registerHandler))
 	mux.HandleFunc("/api/auth/login", method(http.MethodPost, a.loginHandler))
 	mux.HandleFunc("/api/auth/refresh", method(http.MethodPost, a.refreshHandler))
 	mux.HandleFunc("/api/auth/logout", method(http.MethodPost, a.logoutHandler))
