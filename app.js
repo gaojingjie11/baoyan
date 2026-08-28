@@ -24,7 +24,9 @@ const MAJORS = {
 };
 const DEFAULT_MAJOR = '计算机';
 let currentMajor = DEFAULT_MAJOR;
+let switchingMajor = false; // 切专业期间不让 token 刷新把 currentMajor 盖回旧值
 function majorCfg() { return MAJORS[currentMajor] || MAJORS[DEFAULT_MAJOR]; }
+function cacheBust(url) { return url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(); }
 
 const list = document.querySelector('#list');
 const empty = document.querySelector('#empty');
@@ -44,8 +46,8 @@ const API_URL = API_BASE ? API_BASE + '/api' : '/api';
 function setSession(access, user) {
   accessToken = access || '';
   currentUser = user || null;
-  // 后端记住的专业优先级最高；若专业已下线则退回默认专业
-  if (user && user.major && MAJORS[user.major]) currentMajor = user.major;
+  // 后端记住的专业优先级最高；但切专业过程中 token 刷新不应把 currentMajor 盖回旧值
+  if (!switchingMajor && user && user.major && MAJORS[user.major]) currentMajor = user.major;
 }
 function clearSession() { accessToken = ''; currentUser = null; progressMap = {}; }
 
@@ -110,7 +112,7 @@ function progressMeta(key) { return PROGRESS.find(p => p.key === key) || PROGRES
 
 async function loadProgressFromAPI() {
   try {
-    const res = await apiFetch('/progress', { cache: 'no-store' });
+    const res = await apiFetch(cacheBust('/progress'), { cache: 'no-store' });
     if (!res.ok) return false;
     const data = await res.json();
     if (data && typeof data === 'object') {
@@ -235,6 +237,7 @@ document.querySelector('#major')?.addEventListener('change', async e => {
   const next = e.target.value;
   if (!MAJORS[next] || next === currentMajor) return;
   const prev = currentMajor;
+  switchingMajor = true;
   try {
     const res = await apiFetch('/me/major', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ major: next }) });
     if (!res.ok) throw new Error('switch failed');
@@ -245,7 +248,11 @@ document.querySelector('#major')?.addEventListener('change', async e => {
     flashSync(`已切换到 ${next}`);
   } catch (err) {
     e.target.value = prev;
+    currentMajor = prev;
+    if (currentUser) currentUser.major = prev;
     flashSync('切换专业失败，请重试', true);
+  } finally {
+    switchingMajor = false;
   }
 });
 
@@ -517,14 +524,14 @@ async function bootstrap() {
   rows = [];
   let updatedAt = '';
   try {
-    const res = await apiFetch('/schools?major=' + encodeURIComponent(currentMajor), { cache: 'no-store' });
+    const res = await apiFetch(cacheBust('/schools?major=' + encodeURIComponent(currentMajor)), { cache: 'no-store' });
     if (!res.ok) throw new Error('bad status');
     const payload = await res.json();
     rows = payload.schools || [];
     updatedAt = payload.updated_at || '';
   } catch (e) {
     try {
-      const res = await fetch('schools.json', { cache: 'no-store' });
+      const res = await fetch(cacheBust('schools.json'), { cache: 'no-store' });
       if (res.ok) {
         const payload = await res.json();
         // 本地兜底自己过滤：加专业之前的历史数据 major 为空，视为默认专业
@@ -540,9 +547,12 @@ async function bootstrap() {
   } else {
     empty.textContent = '没有匹配结果';
   }
-  rows.sort((a, b) => typeRank(a.type) - typeRank(a.type) || sortKey(a) - sortKey(b));
+  rows.sort((a, b) => typeRank(a.type) - typeRank(b.type) || sortKey(a) - sortKey(b));
   document.querySelector('#updated').textContent = `数据更新：${updatedAt || '未注明'}`;
-  if (!await loadProgressFromAPI()) throw new Error('progress unavailable');
+  // 进度加载失败不应阻塞学校列表渲染（网络抖动时至少能看见院校）
+  if (!await loadProgressFromAPI()) {
+    console.warn('progress sync failed, using local cache');
+  }
   updateSyncBadge();
   applyTheme();
   applyMajorChrome();
