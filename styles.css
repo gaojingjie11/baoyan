@@ -115,6 +115,9 @@ h1{font-size:30px;margin:0 0 8px}
 .badge.dir-cs{background:#eef2ff;color:#4338ca}      /* 计算机 */
 .badge.dir-sec{background:#ecfeff;color:#0e7490}     /* 网安 */
 .badge.dir-other{background:#f1f5f9;color:#64748b}   /* 其他 */
+.badge.dir-gis{background:#ecfdf5;color:#047857}     /* GIS */
+.badge.dir-rs{background:#fff7ed;color:#c2410c}      /* 遥感 */
+.badge.dir-sm{background:#f5f3ff;color:#6d28d9}      /* 测绘 */
 .status.open{background:var(--green-bg);color:var(--green)}
 .status.soon{background:var(--amber-bg);color:var(--amber)}
 .status.closed{background:var(--red-bg);color:var(--red)}
@@ -161,8 +164,8 @@ select.progress.p-failed{color:var(--p-failed);background:var(--p-failed-bg);bor
 .login-card h2{margin:0 0 4px;font-size:22px}
 .login-sub{margin:0 0 18px;color:var(--muted);font-size:13px}
 .login-card label{display:block;font-size:13px;color:var(--muted);font-weight:650;margin-bottom:12px}
-.login-card input{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:15px;outline:none}
-.login-card input:focus{border-color:#bfdbfe}
+.login-card input,.login-card select{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:15px;outline:none;font-family:inherit;background:#fff;color:#0f172a}
+.login-card input:focus,.login-card select:focus{border-color:#bfdbfe}
 .login-btn{width:100%;border:none;background:#1d4ed8;color:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:650;cursor:pointer}
 .login-btn:hover{background:#1e40af}
 .login-err{color:var(--red);font-size:13px;margin-top:12px;min-height:18px;text-align:center}

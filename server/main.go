@@ -48,12 +48,17 @@ func (a *app) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
+		Major    string `json:"major"`
 	}
 	if err := readJSON(r, &body); err != nil || len(body.Username) == 0 || len(body.Username) > 64 || len(body.Password) == 0 || len(body.Password) > 256 {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid credentials"})
 		return
 	}
-	s, err := a.login(r.Context(), strings.TrimSpace(body.Username), body.Password)
+	if body.Major != "" && normalizeMajor(body.Major) == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid major"})
+		return
+	}
+	s, err := a.login(r.Context(), strings.TrimSpace(body.Username), body.Password, normalizeMajor(body.Major))
 	if errors.Is(err, errUnauthorized) {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "用户名或密码错误"})
 		return
@@ -108,7 +113,7 @@ func (a *app) meHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var user userPublic
-	err = a.db.QueryRowContext(r.Context(), `SELECT id, username, theme_config FROM users WHERE id=$1`, uid).Scan(&user.ID, &user.Username, &user.Theme)
+	err = a.db.QueryRowContext(r.Context(), `SELECT id, username, theme_config, major FROM users WHERE id=$1`, uid).Scan(&user.ID, &user.Username, &user.Theme, &user.Major)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
 		return
@@ -117,7 +122,35 @@ func (a *app) meHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "server error"})
 		return
 	}
+	if user.Major == "" {
+		user.Major = defaultMajor
+	}
 	writeJSON(w, http.StatusOK, user)
+}
+
+// majorHandler 供个人中心切换专业。
+func (a *app) majorHandler(w http.ResponseWriter, r *http.Request) {
+	uid, err := a.authenticate(r)
+	if err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return
+	}
+	var body struct {
+		Major string `json:"major"`
+	}
+	major := ""
+	if readJSON(r, &body) == nil {
+		major = normalizeMajor(body.Major)
+	}
+	if major == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid major"})
+		return
+	}
+	if _, err := a.db.ExecContext(r.Context(), `UPDATE users SET major=$2 WHERE id=$1`, uid, major); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "server error"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"major": major})
 }
 
 func (a *app) themeHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,6 +264,8 @@ func (a *app) migrate(ctx context.Context) error {
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, theme_config JSONB NOT NULL DEFAULT '{"theme":"system"}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS theme_config JSONB NOT NULL DEFAULT '{"theme":"system"}'::jsonb`,
+		// 默认值必须与 auth.go 的 defaultMajor 保持一致
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS major TEXT NOT NULL DEFAULT '计算机'`,
 		`CREATE TABLE IF NOT EXISTS schools (id TEXT PRIMARY KEY, school TEXT NOT NULL, tier TEXT NOT NULL, college TEXT NOT NULL, direction TEXT NOT NULL, major TEXT NOT NULL, start_text TEXT NOT NULL, end_text TEXT NOT NULL, status TEXT NOT NULL, site TEXT NOT NULL, admit TEXT NOT NULL, source TEXT NOT NULL, remark TEXT NOT NULL, source_updated_at TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
 		`CREATE TABLE IF NOT EXISTS progress (id SERIAL PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, school_id TEXT NOT NULL, status TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), UNIQUE(user_id, school_id))`,
 		`CREATE TABLE IF NOT EXISTS refresh_tokens (token_hash BYTEA PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, revoked_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
@@ -339,6 +374,7 @@ func main() {
 	mux.HandleFunc("/api/auth/logout", method(http.MethodPost, a.logoutHandler))
 	mux.HandleFunc("/api/me", method(http.MethodGet, a.meHandler))
 	mux.HandleFunc("/api/me/theme", method(http.MethodPut, a.themeHandler))
+	mux.HandleFunc("/api/me/major", method(http.MethodPut, a.majorHandler))
 	mux.HandleFunc("/api/progress", method(http.MethodGet, a.progressGetHandler))
 	mux.HandleFunc("/api/progress/{schoolID}", method(http.MethodPut, a.progressPutHandler))
 	server := &http.Server{Addr: ":" + getenv("PORT", "8080"), Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 60 * time.Second}

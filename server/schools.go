@@ -120,8 +120,21 @@ func (a *app) ensureProgressSchoolForeignKey(ctx context.Context) error {
 	return err
 }
 
+// majorExpr 把 schools 表里的空 major 归一为默认专业，兼容加专业之前的历史数据。
+// 字面量必须与 auth.go 的 defaultMajor 保持一致。
+const majorExpr = `COALESCE(NULLIF(major,''), '计算机')`
+
 func (a *app) schoolsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := a.db.QueryContext(r.Context(), `SELECT id, school, tier, college, direction, major, start_text, end_text, status, site, admit, source, remark FROM schools`)
+	major := normalizeMajor(r.URL.Query().Get("major"))
+	query := `SELECT id, school, tier, college, direction, ` + majorExpr + `, start_text, end_text, status, site, admit, source, remark FROM schools`
+	updatedQuery := `SELECT COALESCE(MAX(source_updated_at), '') FROM schools`
+	var args []any
+	if major != "" {
+		query += ` WHERE ` + majorExpr + ` = $1`
+		updatedQuery += ` WHERE ` + majorExpr + ` = $1`
+		args = append(args, major)
+	}
+	rows, err := a.db.QueryContext(r.Context(), query, args...)
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "server error"})
 		return
@@ -152,7 +165,7 @@ func (a *app) schoolsHandler(w http.ResponseWriter, r *http.Request) {
 		return li < ri
 	})
 	var updatedAt string
-	if err := a.db.QueryRowContext(r.Context(), `SELECT COALESCE(MAX(source_updated_at), '') FROM schools`).Scan(&updatedAt); err != nil {
+	if err := a.db.QueryRowContext(r.Context(), updatedQuery, args...).Scan(&updatedAt); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "server error"})
 		return
 	}

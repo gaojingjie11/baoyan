@@ -40,6 +40,25 @@ type userPublic struct {
 	ID       int             `json:"id"`
 	Username string          `json:"username"`
 	Theme    json.RawMessage `json:"theme"`
+	Major    string          `json:"major"`
+}
+
+// 可选专业白名单。数据库中的空 major 一律视为 DefaultMajor（历史数据兼容）。
+var majors = []string{"计算机", "地理信息科学"}
+
+const defaultMajor = "计算机"
+
+// normalizeMajor 把用户传入的专业归一化为合法值；空串表示「不改动」，非法值返回 ""。
+func normalizeMajor(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	for _, m := range majors {
+		if m == raw {
+			return m
+		}
+	}
+	return ""
 }
 
 type session struct {
@@ -167,18 +186,28 @@ func (a *app) issueSession(ctx context.Context, tx *sql.Tx, user userPublic, fam
 	return session{AccessToken: access, RefreshToken: refresh, RefreshUntil: expires, User: user}, nil
 }
 
-func (a *app) login(ctx context.Context, username, password string) (session, error) {
+// login 校验凭据。major 非空时把用户当前专业切换为该值；传空串表示沿用上次选择。
+func (a *app) login(ctx context.Context, username, password, major string) (session, error) {
 	var user userPublic
 	var hash string
-	err := a.db.QueryRowContext(ctx, `SELECT id, username, password_hash, theme_config FROM users WHERE username=$1`, username).Scan(&user.ID, &user.Username, &hash, &user.Theme)
+	err := a.db.QueryRowContext(ctx, `SELECT id, username, password_hash, theme_config, major FROM users WHERE username=$1`, username).Scan(&user.ID, &user.Username, &hash, &user.Theme, &user.Major)
 	if errors.Is(err, sql.ErrNoRows) {
 		return session{}, errUnauthorized
 	}
 	if err != nil {
 		return session{}, err
 	}
+	if user.Major == "" {
+		user.Major = defaultMajor
+	}
 	if !verifyPassword(password, hash, a.pepper) {
 		return session{}, errUnauthorized
+	}
+	if major != "" && major != user.Major {
+		if _, err := a.db.ExecContext(ctx, `UPDATE users SET major=$2 WHERE id=$1`, user.ID, major); err != nil {
+			return session{}, err
+		}
+		user.Major = major
 	}
 	tx, err := a.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -225,8 +254,11 @@ func (a *app) refresh(ctx context.Context, raw string) (session, error) {
 		}
 		return session{}, err
 	}
-	if err := tx.QueryRowContext(ctx, `SELECT username, theme_config FROM users WHERE id=$1`, user.ID).Scan(&user.Username, &user.Theme); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT username, theme_config, major FROM users WHERE id=$1`, user.ID).Scan(&user.Username, &user.Theme, &user.Major); err != nil {
 		return session{}, err
+	}
+	if user.Major == "" {
+		user.Major = defaultMajor
 	}
 	s, err := a.issueSession(ctx, tx, user, familyID)
 	if err != nil {

@@ -2,6 +2,30 @@
 let rows = [];
 let filters = { type: 'all', dir: 'all', prog: 'all', status: 'all' };
 
+/* ---------- 专业（major） ----------
+   不同专业展示不同的院校数据。进度按 school_id 关联，各专业 id 号段互不重叠，
+   所以同一账号在多个专业的进度天然隔离，不需要额外的隔离逻辑。
+   加新专业：在这里加一项即可，方向筛选、排序权重、配色会自动跟着走。 */
+const MAJORS = {
+  '计算机': {
+    title: '计算机预推免追踪',
+    sub: '985 优先 · 211 随后 · 软件工程 / 计算机 / 网安 方向',
+    directions: ['软件工程', '计算机', '网安', '其他'],
+    dirRank: { '软件工程': 0, '计算机': 1, '网安': 2, '其他': 3 },
+    dirCls: { '软件工程': 'dir-se', '计算机': 'dir-cs', '网安': 'dir-sec', '其他': 'dir-other' },
+  },
+  '地理信息科学': {
+    title: '地理信息科学预推免追踪',
+    sub: '985 优先 · 211 随后 · GIS / 遥感 / 测绘 方向',
+    directions: ['GIS', '遥感', '测绘', '其他'],
+    dirRank: { 'GIS': 0, '遥感': 1, '测绘': 2, '其他': 3 },
+    dirCls: { 'GIS': 'dir-gis', '遥感': 'dir-rs', '测绘': 'dir-sm', '其他': 'dir-other' },
+  },
+};
+const DEFAULT_MAJOR = '计算机';
+let currentMajor = DEFAULT_MAJOR;
+function majorCfg() { return MAJORS[currentMajor] || MAJORS[DEFAULT_MAJOR]; }
+
 const list = document.querySelector('#list');
 const empty = document.querySelector('#empty');
 const search = document.querySelector('#search');
@@ -17,7 +41,12 @@ const API_BASE = (window.BAOYAN_API || '').replace(/\/+$/, '');
 // BAOYAN_API 留空 → 走同源 /api（nginx 同域部署时无需域名）；填了 → 用该绝对地址
 const API_URL = API_BASE ? API_BASE + '/api' : '/api';
 
-function setSession(access, user) { accessToken = access || ''; currentUser = user || null; }
+function setSession(access, user) {
+  accessToken = access || '';
+  currentUser = user || null;
+  // 后端记住的专业优先级最高；若专业已下线则退回默认专业
+  if (user && user.major && MAJORS[user.major]) currentMajor = user.major;
+}
 function clearSession() { accessToken = ''; currentUser = null; progressMap = {}; }
 
 // 带鉴权 + 自动刷新（短 token 过期 → HttpOnly 长 token 换新短 token）的请求
@@ -119,11 +148,12 @@ loginForm.addEventListener('submit', async (e) => {
   loginErr.textContent = '';
   const username = loginForm.username.value.trim();
   const password = loginForm.password.value;
+  const major = loginForm.major ? loginForm.major.value : '';
   try {
     const res = await fetch(API_URL + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, major }),
     });
     const data = await res.json();
     if (!res.ok) { loginErr.textContent = data.error || '登录失败'; return; }
@@ -170,6 +200,55 @@ document.querySelector('#theme').addEventListener('change', async e => {
   if (res.ok && currentUser) { currentUser.theme = { theme }; applyTheme(); }
 });
 
+/* ---------- 专业：下拉渲染 / 切换 / 方向筛选联动 ---------- */
+function renderMajorSelects() {
+  const opts = Object.keys(MAJORS).map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  const loginSel = document.querySelector('#login-major');
+  if (loginSel) { loginSel.innerHTML = opts; loginSel.value = currentMajor; }
+  const barSel = document.querySelector('#major');
+  if (barSel) { barSel.innerHTML = opts; barSel.value = currentMajor; }
+}
+
+function applyMajorChrome() {
+  const cfg = majorCfg();
+  const t = document.querySelector('#page-title');
+  const s = document.querySelector('#page-sub');
+  if (t) t.textContent = cfg.title;
+  if (s) s.textContent = cfg.sub;
+  document.title = `2027 ${cfg.title}`;
+}
+
+// 方向 chips 随专业变化；切专业后旧方向若不存在则自动归位到「全部」
+function renderDirectionChips() {
+  const box = document.querySelector('#dir-chips');
+  if (!box) return;
+  const dirs = majorCfg().directions;
+  if (filters.dir !== 'all' && !dirs.includes(filters.dir)) filters.dir = 'all';
+  box.innerHTML = [['all', '全部'], ...dirs.map(d => [d, d])]
+    .map(([v, label]) => `<button class="chip${filters.dir === v ? ' active' : ''}" data-group="dir" data-value="${esc(v)}">${esc(label)}</button>`)
+    .join('');
+  box.querySelectorAll('.chip[data-group]').forEach(btn =>
+    btn.addEventListener('click', () => setFilter('dir', btn.dataset.value)));
+}
+
+document.querySelector('#major')?.addEventListener('change', async e => {
+  const next = e.target.value;
+  if (!MAJORS[next] || next === currentMajor) return;
+  const prev = currentMajor;
+  try {
+    const res = await apiFetch('/me/major', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ major: next }) });
+    if (!res.ok) throw new Error('switch failed');
+    currentMajor = next;
+    if (currentUser) currentUser.major = next;
+    filters.dir = 'all';
+    await bootstrap();
+    flashSync(`已切换到 ${next}`);
+  } catch (err) {
+    e.target.value = prev;
+    flashSync('切换专业失败，请重试', true);
+  }
+});
+
 /* ---------- 时间与官方报名状态 ---------- */
 function todayCN() {
   const now = new Date();
@@ -201,10 +280,9 @@ function countdownParts(ms) {
   return { done: false, text: d > 0 ? `${d}天${h}时${m}分` : h > 0 ? `${h}时${m}分` : `${m}分` };
 }
 
-/* ---------- 排序：985→211，再按 软件工程>计算机>网安>其他 ---------- */
+/* ---------- 排序：985→211，再按当前专业定义的方向优先级 ---------- */
 function typeRank(t) { return t === '985' ? 0 : t === '211' ? 1 : 2; }
-const DIR_RANK = { '软件工程': 0, '计算机': 1, '网安': 2, '其他': 3 };
-function dirRank(d) { return DIR_RANK[d] !== undefined ? DIR_RANK[d] : 3; }
+function dirRank(d) { const r = majorCfg().dirRank[d]; return r === undefined ? 3 : r; }
 
 /* 排序键：985/211 内，截止越近越前，时间不清的越后 */
 function sortKey(r) {
@@ -215,7 +293,7 @@ function sortKey(r) {
   if (st.key === 'closed') return 1e18 + endMs;
   return endMs;
 }
-const DIR_CLS = { '软件工程': 'dir-se', '计算机': 'dir-cs', '网安': 'dir-sec', '其他': 'dir-other' };
+function dirCls(d) { return majorCfg().dirCls[d] || 'dir-other'; }
 
 function esc(s = '') { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function link(url, label, secondary = false) {
@@ -306,7 +384,7 @@ function render() {
         <div class="title-row">
           <div class="school">${esc(r.school)}</div>
           <span class="badge ${r.type === '211' ? 'type-211' : ''}">${esc(r.type)}</span>
-          <span class="badge ${DIR_CLS[r.direction] || 'dir-other'}">${esc(r.direction)}</span>
+          <span class="badge ${dirCls(r.direction)}">${esc(r.direction)}</span>
           <span class="status ${st.key}">${esc(st.label)}</span>
         </div>
         <div class="college">${esc(r.college)}</div>
@@ -435,11 +513,11 @@ document.querySelector('#file-import').addEventListener('change', e => {
 /* ---------- 初始化 ---------- */
 async function bootstrap() {
   if (!accessToken && !await doRefresh()) { showLogin(); return; }
-  // 拉学校：优先 /api/schools（后端），失败则回退本地 schools.json，保证列表始终可见
+  // 拉学校：优先 /api/schools?major=（后端按专业过滤），失败则回退本地 schools.json 并在前端过滤
   rows = [];
   let updatedAt = '';
   try {
-    const res = await apiFetch('/schools', { cache: 'no-store' });
+    const res = await apiFetch('/schools?major=' + encodeURIComponent(currentMajor), { cache: 'no-store' });
     if (!res.ok) throw new Error('bad status');
     const payload = await res.json();
     rows = payload.schools || [];
@@ -449,17 +527,27 @@ async function bootstrap() {
       const res = await fetch('schools.json', { cache: 'no-store' });
       if (res.ok) {
         const payload = await res.json();
-        rows = payload.schools || [];
+        // 本地兜底自己过滤：加专业之前的历史数据 major 为空，视为默认专业
+        rows = (payload.schools || []).filter(r => (r.major || DEFAULT_MAJOR) === currentMajor);
         updatedAt = payload.updated_at || '';
       }
     } catch (_) { /* 忽略 */ }
   }
-  if (!rows.length) throw new Error('schools unavailable');
+  if (!rows.length) {
+    // 默认专业拿不到数据才算故障；新专业允许暂时为空，只显示空态
+    if (currentMajor === DEFAULT_MAJOR) throw new Error('schools unavailable');
+    empty.textContent = `「${currentMajor}」暂无院校数据`;
+  } else {
+    empty.textContent = '没有匹配结果';
+  }
   rows.sort((a, b) => typeRank(a.type) - typeRank(a.type) || sortKey(a) - sortKey(b));
   document.querySelector('#updated').textContent = `数据更新：${updatedAt || '未注明'}`;
   if (!await loadProgressFromAPI()) throw new Error('progress unavailable');
   updateSyncBadge();
   applyTheme();
+  applyMajorChrome();
+  renderMajorSelects();
+  renderDirectionChips();
   if (currentUser && userNameEl) userNameEl.textContent = currentUser.username;
   if (userbar) userbar.hidden = false;
   renderStats(); renderFocus(); renderReminder(); render();
@@ -475,5 +563,8 @@ async function init() {
     showLogin();
   }
 }
+// 未登录时登录页也要能选专业
+renderMajorSelects();
+applyMajorChrome();
 setInterval(tick, 30000);
 init();
