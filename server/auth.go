@@ -45,7 +45,7 @@ type userPublic struct {
 }
 
 // 可选专业白名单。数据库中的空 major 一律视为 DefaultMajor（历史数据兼容）。
-var majors = []string{"计算机", "地理信息科学", "工商管理"}
+var majors = []string{"计算机", "地理信息科学", "工商管理", "工程管理"}
 
 const defaultMajor = "计算机"
 

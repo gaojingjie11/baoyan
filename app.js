@@ -28,6 +28,13 @@ const MAJORS = {
     dirRank: { '工商管理': 0, '会计': 1, '金融': 2, '管理科学与工程': 3, '其他': 4 },
     dirCls: { '工商管理': 'dir-ba', '会计': 'dir-acc', '金融': 'dir-fin', '管理科学与工程': 'dir-mse', '其他': 'dir-other' },
   },
+  '工程管理': {
+    title: '工程管理预推免追踪',
+    sub: '985 优先 · 211 随后 · 管科 / 工程管理 / 工业工程 / 物流 方向',
+    directions: ['管理科学与工程', '工程管理', '工业工程与管理', '物流工程与管理', '其他'],
+    dirRank: { '管理科学与工程': 0, '工程管理': 1, '工业工程与管理': 2, '物流工程与管理': 3, '其他': 4 },
+    dirCls: { '管理科学与工程': 'dir-mse', '工程管理': 'dir-em', '工业工程与管理': 'dir-ie', '物流工程与管理': 'dir-le', '其他': 'dir-other' },
+  },
 };
 const DEFAULT_MAJOR = '计算机';
 let currentMajor = DEFAULT_MAJOR;

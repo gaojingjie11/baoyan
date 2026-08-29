@@ -29,6 +29,7 @@ MAJORS = {
     "计算机": (lambda m: m in ("", "计算机"), 14),
     "地理信息科学": (lambda m: m == "地理信息科学", 6),
     "工商管理": (lambda m: m == "工商管理", 6),
+    "工程管理": (lambda m: m == "工程管理", 6),
 }
 
 # Local status correction
