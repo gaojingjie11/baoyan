@@ -21,6 +21,13 @@ const MAJORS = {
     dirRank: { 'GIS': 0, '遥感': 1, '测绘': 2, '其他': 3 },
     dirCls: { 'GIS': 'dir-gis', '遥感': 'dir-rs', '测绘': 'dir-sm', '其他': 'dir-other' },
   },
+  '工商管理': {
+    title: '工商管理预推免追踪',
+    sub: '985 优先 · 211 随后 · 工商管理 / 会计 / 金融 / 管工 方向',
+    directions: ['工商管理', '会计', '金融', '管理科学与工程', '其他'],
+    dirRank: { '工商管理': 0, '会计': 1, '金融': 2, '管理科学与工程': 3, '其他': 4 },
+    dirCls: { '工商管理': 'dir-ba', '会计': 'dir-acc', '金融': 'dir-fin', '管理科学与工程': 'dir-mse', '其他': 'dir-other' },
+  },
 };
 const DEFAULT_MAJOR = '计算机';
 let currentMajor = DEFAULT_MAJOR;

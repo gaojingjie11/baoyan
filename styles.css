@@ -118,6 +118,10 @@ h1{font-size:30px;margin:0 0 8px}
 .badge.dir-gis{background:#ecfdf5;color:#047857}     /* GIS */
 .badge.dir-rs{background:#fff7ed;color:#c2410c}      /* 遥感 */
 .badge.dir-sm{background:#f5f3ff;color:#6d28d9}      /* 测绘 */
+.badge.dir-ba{background:#fef3c7;color:#92400e}      /* 工商管理：该专业首选方向，醒目 */
+.badge.dir-acc{background:#fff1f2;color:#be123c}     /* 会计 */
+.badge.dir-fin{background:#ccfbf1;color:#115e59}     /* 金融 */
+.badge.dir-mse{background:#dbeafe;color:#1e40af}     /* 管理科学与工程 */
 .status.open{background:var(--green-bg);color:var(--green)}
 .status.soon{background:var(--amber-bg);color:var(--amber)}
 .status.closed{background:var(--red-bg);color:var(--red)}
