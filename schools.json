@@ -3883,7 +3883,7 @@
       "site": "https://yjszs.bfsu.edu.cn/#/homeIndex",
       "admit": "学硕/专硕/直博",
       "source": "https://ibs.bfsu.edu.cn/info/1491/47761.htm",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "remark": "北外2027接收推免：国际商学院在列，研招系统9/6–9/9 17:30开放（已核实官方通知）",
       "id": 2079,
       "major": "工商管理"
     },
@@ -5983,7 +5983,7 @@
       "site": "https://yjszs.bfsu.edu.cn/#/homeIndex",
       "admit": "学硕/专硕/直博",
       "source": "https://ibs.bfsu.edu.cn/info/1491/47761.htm",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "remark": "北外2027接收推免：国际商学院在列，研招系统9/6–9/9 17:30开放（已核实官方通知）",
       "id": 3080,
       "major": "工程管理"
     },
@@ -7441,6 +7441,21 @@
       "remark": "全校推免预报名系统即日起至2026-09-20开放（工作办法2026-09-06发布）",
       "id": 3177,
       "major": "工程管理"
+    },
+    {
+      "school": "北京化工大学",
+      "type": "211",
+      "college": "信息科学与技术学院",
+      "direction": "计算机科学与技术",
+      "start": "2026-09-07 14:00",
+      "end": "2026-09-20 23:00",
+      "status": "报名中",
+      "site": "https://yzbm.buct.edu.cn/logon",
+      "admit": "学硕/专硕/直博",
+      "source": "https://graduate.buct.edu.cn/2026/0903/c1392a222553/page.htm",
+      "remark": "北化工2027接收推免：信息科学与技术学院在列，研究生报考服务系统9/7 14:00–9/20 23:00开放（校统一窗口，各院细则以学院通知为准）",
+      "id": 138,
+      "major": "计算机"
     }
   ]
 }
