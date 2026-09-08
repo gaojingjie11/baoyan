@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-09",
+  "updated_at": "2026-09-08",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。major 区分专业（空值视为「计算机」），不同专业展示不同院校数据，进度按 school_id 自动隔离。",
   "schools": [
     {
@@ -7471,6 +7471,96 @@
       "remark": "中国石油大学(北京)人工智能学院2027接收推免预报名：8/3起至9/3 23:59，系统gmss.cup.edu.cn。含计算机科学与技术/计算机技术/人工智能等（窗口已截止）",
       "id": 139,
       "major": "计算机"
+    },
+    {
+      "school": "北京林业大学",
+      "type": "211",
+      "college": "信息学院(人工智能学院)",
+      "direction": "计算机科学与技术",
+      "start": "",
+      "end": "",
+      "status": "报名中",
+      "site": "http://tm.yzb.bjfu.edu.cn/",
+      "admit": "学硕/专硕/直博",
+      "source": "https://graduate.bjfu.edu.cn/zsgl/sszs/096fb51b51e44aef9089c25454c2f7aa.html",
+      "remark": "北林2027接收推免实施办法已发，信息学院(人工智能学院)在接收范围；预推免系统http://tm.yzb.bjfu.edu.cn/开放，各院具体截止以学院通知为准",
+      "id": 140,
+      "major": "计算机"
+    },
+    {
+      "school": "中国地质大学(北京)",
+      "type": "211",
+      "college": "信息工程学院",
+      "direction": "计算机科学与技术",
+      "start": "",
+      "end": "",
+      "status": "报名中",
+      "site": "https://bdyzb.cugb.edu.cn/tp/zs/login/toLogin/tm",
+      "admit": "学硕/专硕/直博",
+      "source": "https://bm.cugb.edu.cn/yjsyzsb/c/2026-09-03/856200.shtml",
+      "remark": "地大(北京)2027接收推免(含直博)方案9/3发布，9/4起预报名(bdyzb.cugb.edu.cn)；信息工程学院在接收范围，各院具体截止以学院通知为准",
+      "id": 141,
+      "major": "计算机"
+    },
+    {
+      "school": "中国矿业大学(北京)",
+      "type": "211",
+      "college": "机电与信息工程学院",
+      "direction": "计算机科学与技术",
+      "start": "2026-09-01",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://yjsglxt.cumtb.edu.cn/open/RecruitTkssTmYbm/signin.aspx",
+      "admit": "学硕/专硕/直博",
+      "source": "https://yjs.cumtb.edu.cn/info/1012/16033.htm",
+      "remark": "矿大北京2027接收推免工作安排：推免生预报名系统9/1–9/14开放（校统一窗口，各院复试以学院通知为准）",
+      "id": 142,
+      "major": "计算机"
+    },
+    {
+      "school": "中国矿业大学(北京)",
+      "type": "211",
+      "college": "地球科学与测绘工程学院",
+      "direction": "测绘",
+      "start": "2026-09-01",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://yjsglxt.cumtb.edu.cn/open/RecruitTkssTmYbm/signin.aspx",
+      "admit": "学硕/专硕/直博",
+      "source": "https://yjs.cumtb.edu.cn/info/1012/16033.htm",
+      "remark": "矿大北京2027接收推免：地球科学与测绘工程学院测绘在接收范围，推免生预报名系统9/1–9/14开放（校统一窗口，各院复试以学院通知为准）",
+      "id": 1041,
+      "major": "地理信息科学"
+    },
+    {
+      "school": "中国矿业大学(北京)",
+      "type": "211",
+      "college": "管理学院",
+      "direction": "工商管理",
+      "start": "2026-09-01",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://yjsglxt.cumtb.edu.cn/open/RecruitTkssTmYbm/signin.aspx",
+      "admit": "学硕/专硕/直博",
+      "source": "https://yjs.cumtb.edu.cn/info/1012/16033.htm",
+      "remark": "矿大北京2027接收推免：管理学院工商管理(学硕)在接收范围，推免生预报名系统9/1–9/14开放（MBA 125100不接收推免）",
+      "id": 2139,
+      "major": "工商管理"
+    },
+    {
+      "school": "中国矿业大学(北京)",
+      "type": "211",
+      "college": "管理学院",
+      "direction": "管理科学与工程",
+      "start": "2026-09-01",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://yjsglxt.cumtb.edu.cn/open/RecruitTkssTmYbm/signin.aspx",
+      "admit": "学硕/专硕/直博",
+      "source": "https://yjs.cumtb.edu.cn/info/1012/16033.htm",
+      "remark": "矿大北京2027接收推免：管理学院管理科学与工程(120100)在接收范围，推免生预报名系统9/1–9/14开放（MEM 125601不接收推免）",
+      "id": 3178,
+      "major": "工程管理"
     }
   ]
 }
