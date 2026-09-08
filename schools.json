@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-08",
+  "updated_at": "2026-09-09",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。major 区分专业（空值视为「计算机」），不同专业展示不同院校数据，进度按 school_id 自动隔离。",
   "schools": [
     {
@@ -3849,11 +3849,11 @@
       "direction": "工商管理",
       "start": "",
       "end": "",
-      "status": "待发布",
-      "site": "",
+      "status": "报名中",
+      "site": "http://tm.yzb.bjfu.edu.cn/",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://graduate.bjfu.edu.cn/zsgl/sszs/096fb51b51e44aef9089c25454c2f7aa.html",
+      "remark": "北林2027接收推免：校预推免系统tm.yzb.bjfu.edu.cn已开，各学院自定窗口（经管院具体接收通知待查），以学院官网为准",
       "id": 2077,
       "major": "工商管理"
     },
@@ -5949,11 +5949,11 @@
       "direction": "管理科学与工程",
       "start": "",
       "end": "",
-      "status": "待发布",
-      "site": "",
+      "status": "报名中",
+      "site": "http://tm.yzb.bjfu.edu.cn/",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://graduate.bjfu.edu.cn/zsgl/sszs/096fb51b51e44aef9089c25454c2f7aa.html",
+      "remark": "北林2027接收推免：校预推免系统tm.yzb.bjfu.edu.cn已开，各学院自定窗口（经管院具体接收通知待查），以学院官网为准",
       "id": 3078,
       "major": "工程管理"
     },
