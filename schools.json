@@ -7561,6 +7561,51 @@
       "remark": "矿大北京2027接收推免：管理学院管理科学与工程(120100)在接收范围，推免生预报名系统9/1–9/14开放（MEM 125601不接收推免）",
       "id": 3178,
       "major": "工程管理"
+    },
+    {
+      "school": "大连海事大学",
+      "type": "211",
+      "college": "信息科学技术学院",
+      "direction": "计算机科学与技术",
+      "start": "2026-07-02",
+      "end": "2026-09-30",
+      "status": "报名中",
+      "site": "https://grs.dlmu.edu.cn/info/1139/34511.htm",
+      "admit": "学硕/专硕/直博",
+      "source": "https://grs.dlmu.edu.cn/info/1139/34511.htm",
+      "remark": "2027 推免生报名 7/2–9/30（校研院通知，信息科学技术学院含计算机），复用校级窗口",
+      "id": 143,
+      "major": "计算机"
+    },
+    {
+      "school": "西南大学",
+      "type": "211",
+      "college": "计算机与信息科学学院 软件学院",
+      "direction": "计算机科学与技术",
+      "start": "2026-09-05",
+      "end": "2026-09-14",
+      "status": "报名中",
+      "site": "http://swu.yjszsw.cn/tm/",
+      "admit": "学硕/专硕/直博",
+      "source": "https://cis.swu.edu.cn/info/1145/5987.htm",
+      "remark": "计算机与信息科学学院 软件学院 2027 推免报名 9/5–9/14，系统 swu.yjszsw.cn/tm",
+      "id": 144,
+      "major": "计算机"
+    },
+    {
+      "school": "辽宁大学",
+      "type": "211",
+      "college": "信息学部",
+      "direction": "计算机科学与技术",
+      "start": "2026-09-07 12:00",
+      "end": "2026-09-11 15:00",
+      "status": "报名中",
+      "site": "",
+      "admit": "学硕/专硕/直博",
+      "source": "https://sist.lnu.edu.cn/info/12675/2188.htm",
+      "remark": "信息学部 2027 接收推免复试细则，推免系统 9/7 12:00–9/11 15:00 开放（二维码进入，无显式 URL）",
+      "id": 145,
+      "major": "计算机"
     }
   ]
 }
