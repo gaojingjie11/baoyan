@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-11",
+  "updated_at": "2026-09-12",
   "note": "以学院为最细区分单位；同一学校不同学院/专业各成一条，可分别跟踪报名截止。major 区分专业（空值视为「计算机」），不同专业展示不同院校数据，进度按 school_id 自动隔离。",
   "schools": [
     {
@@ -52,15 +52,16 @@
       "type": "985",
       "college": "计算机学院",
       "direction": "计算机",
-      "start": "",
-      "end": "",
-      "status": "待发布",
+      "start": "2026-09-07 19:00",
+      "end": "2026-09-12 23:59",
+      "status": "报名中",
       "site": "",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
+      "source": "https://scse.buaa.edu.cn/info/1099/12508.htm",
+      "remark": "北航计算机学院2027接收推免工作方案，材料提交截止2026-09-12 23:59（校研招网各院汇总确认）",
       "id": 3,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京理工大学",
@@ -309,13 +310,14 @@
       "direction": "计算机",
       "start": "2026-08-08",
       "end": "2026-09-10 24:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yjsy.zju.edu.cn/grsinfo/zs/user/login",
       "admit": "学硕/专硕/直博",
       "source": "http://www.grs.zju.edu.cn/yjszs/2026/0805/c28479a3193539/page.htm",
       "remark": "浙江大学计算机科学与技术学院2027推免报名",
       "id": 20,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "中国科学技术大学",
@@ -474,13 +476,14 @@
       "direction": "计算机",
       "start": "2026-09-05 14:00",
       "end": "2026-09-11 12:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yz.scu.edu.cn/xly/login/",
       "admit": "学硕/专硕/直博",
       "source": "https://cs.scu.edu.cn/info/1247/20058.htm",
       "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
       "id": 31,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "重庆大学",
@@ -699,13 +702,14 @@
       "direction": "计算机",
       "start": "2026-09-08",
       "end": "2026-09-11 23:59",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://gsadmission.bjtu.edu.cn/recommend/signin/",
       "admit": "学硕/专硕/直博",
       "source": "http://cs.bjtu.edu.cn/zsjy/yjszs3/yjszs_sszs/8ce8fda50ff4483fbac2176c12a33b2b.htm",
       "remark": "计算机与信息技术学院2027推免预报名，系统开放2026-09-08 00:00至09-11 23:59（校推免预报名系统gsadmission.bjtu.edu.cn）；校汇总页gs.bjtu.edu.cn/tzgg/zstzgg/07933714...确认各院窗口一致",
       "id": 46,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京科技大学",
@@ -969,13 +973,14 @@
       "direction": "计算机",
       "start": "2026-09-03 08:00",
       "end": "2026-09-11 18:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://grd.ccnu.edu.cn/student/ytmlogin",
       "admit": "学硕/专硕/直博",
       "source": "https://gs.ccnu.edu.cn/info/1028/6893.htm",
       "remark": "华中师范大学研究生院《2027年接收优秀应届本科毕业生免试攻读研究生预报名通知》(2026-08-26发布)，全校统一系统开放 2026-09-03 08:00 至 2026-09-11 18:00，复试预计9月中旬由各学院自行通知。",
       "id": 64,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "中南财经政法大学",
@@ -1373,14 +1378,15 @@
       "college": "软件学院",
       "direction": "软件工程",
       "start": "",
-      "end": "",
-      "status": "待发布",
+      "end": "2026-09-14 12:00",
+      "status": "报名中",
       "site": "",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
+      "source": "https://soft.buaa.edu.cn/news_nry.jsp?urltype=news.NewsContentUrl&wbtreeid=1325&wbnewsid=12442",
+      "remark": "北航软件学院2027接收推免工作方案，截止2026-09-14 12:00",
       "id": 91,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京航空航天大学",
@@ -1388,14 +1394,15 @@
       "college": "网络空间安全学院",
       "direction": "网安",
       "start": "",
-      "end": "",
-      "status": "待发布",
+      "end": "2026-09-14 23:00",
+      "status": "报名中",
       "site": "",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
+      "source": "https://cst.buaa.edu.cn/info/1125/5436.htm",
+      "remark": "北航网络空间安全学院2027接收推免工作方案，截止2026-09-14 23:00",
       "id": 92,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京理工大学",
@@ -1659,13 +1666,14 @@
       "direction": "软件工程",
       "start": "2026-08-10",
       "end": "2026-09-10 24:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yjsy.zju.edu.cn/grsinfo/zs/user/login",
       "admit": "学硕/专硕/直博",
       "source": "http://www.cst.zju.edu.cn/2026/0807/c32178a3193974/page.htm",
       "remark": "浙江大学软件学院2027推免报名",
       "id": 110,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "浙江大学",
@@ -1674,13 +1682,14 @@
       "direction": "网安",
       "start": "2026-08-10 09:00",
       "end": "2026-09-10 24:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "http://www.grs.zju.edu.cn/yjszs/2026/0805/c28479a3193539/page.htm",
       "admit": "学硕/专硕/直博",
       "source": "http://www.cs.zju.edu.cn/csen/2026/0807/c27006a3193973/page.htm",
       "remark": "浙江大学2027推免系统8/10开放，全校统一截止9/10 24:00；计算机学院通知列网络空间安全(083900)学硕/直博与电子信息-网络与信息安全(085400)方向",
       "id": 111,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "中国科学技术大学",
@@ -1899,13 +1908,14 @@
       "direction": "软件工程",
       "start": "2026-09-05 14:00",
       "end": "2026-09-11 12:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yz.scu.edu.cn/xly/login/",
       "admit": "学硕/专硕/直博",
       "source": "https://cs.scu.edu.cn/info/1247/20058.htm",
       "remark": "截至2026-08-11未核实到2027预推免官方报名时间，避免使用估算日期",
       "id": 126,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "四川大学",
@@ -1914,13 +1924,14 @@
       "direction": "网安",
       "start": "2026-09-05",
       "end": "2026-09-11 22:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yz.scu.edu.cn/xly/login/",
       "admit": "学硕/专硕/直博",
       "source": "https://ccs.scu.edu.cn/info/1013/2311.htm",
       "remark": "四川大学网络空间安全学院2027预推免，报名截止9/11 22:00（来源：网安学院官方通知）",
       "id": 127,
-      "major": ""
+      "major": "",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "重庆大学",
@@ -2154,13 +2165,14 @@
       "direction": "GIS",
       "start": "2026-09-02",
       "end": "2026-09-11 12:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://xly.bnu.edu.cn/tm",
       "admit": "推免",
       "source": "https://geo.bnu.edu.cn/tzgg/1a7ab4a5878944c6b3decf5200ba9994.html",
       "remark": "往年参考：北师大推免申请系统（https://yzh.bnu.edu.cn/www/tm/xs/login）9月上旬开放，2026届《接收校内外推荐免试硕士/博士研究生办法》见 https://yz.bnu.edu.cn/detail/02a73691-77f2-4df1-a2d5-3ffa97c79f9c ，2027通知未发布：北师大研究生院及各院系2027年接收推免办法（地理科学学部）官网均未检索到，研招网硕士招生公告栏目仍为2026年内容。北师大2027届地理科学学部夏令营已于2026年7月6-8日举办（非预推免，不计入）",
       "id": 1005,
-      "major": "地理信息科学"
+      "major": "地理信息科学",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "同济大学",
@@ -2529,13 +2541,14 @@
       "direction": "GIS",
       "start": "",
       "end": "",
-      "status": "待发布",
+      "status": "报名中",
       "site": "",
       "admit": "推免",
-      "source": "https://yjsy.nenu.edu.cn/",
-      "remark": "往年参考：9月8日起预报名（研究生招生服务系统 yz.nenu.edu.cn/ybm），2027 通知未发布",
+      "source": "https://geo.nenu.edu.cn/info/1103/12135.htm",
+      "remark": "东北师范大学地理科学学院2027推免招生综合考核实施细则已发布(2026-09-11)，报名系统开放/截止以校研招网为准",
       "id": 1030,
-      "major": "地理信息科学"
+      "major": "地理信息科学",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "华中师范大学",
@@ -2544,13 +2557,14 @@
       "direction": "GIS",
       "start": "2026-09-03 08:00",
       "end": "2026-09-11 18:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://grd.ccnu.edu.cn/student/ytmlogin",
       "admit": "学硕/专硕/直博",
       "source": "https://gs.ccnu.edu.cn/info/1028/6893.htm",
       "remark": "校级统一报名：华中师范大学2027年接收优秀应届本科毕业生免试攻读研究生预报名通知（2026-08-26发布），复试预计9月中旬，各学院自行安排",
       "id": 1031,
-      "major": "地理信息科学"
+      "major": "地理信息科学",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "陕西师范大学",
@@ -2798,14 +2812,15 @@
       "college": "经济管理学院",
       "direction": "工商管理",
       "start": "",
-      "end": "",
-      "status": "待发布",
+      "end": "2026-09-12 09:00",
+      "status": "报名中",
       "site": "",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://sem.buaa.edu.cn/info/1116/18513.htm",
+      "remark": "北航经济管理学院2027接收推免工作方案（工商管理），截止2026-09-12 09:00",
       "id": 2007,
-      "major": "工商管理"
+      "major": "工商管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京理工大学",
@@ -3384,13 +3399,14 @@
       "direction": "工商管理",
       "start": "2026-09-08",
       "end": "2026-09-11 10:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yz.scu.edu.cn/xly/login/",
       "admit": "学硕/专硕/直博",
       "source": "https://bs.scu.edu.cn/zhaosheng/202609/11110.html",
       "remark": "商学院2027推免预报名，网报截止2026-09-11 10:00",
       "id": 2046,
-      "major": "工商管理"
+      "major": "工商管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "四川大学",
@@ -3790,13 +3806,14 @@
       "direction": "工商管理",
       "start": "2026-09-08",
       "end": "2026-09-11",
-      "status": "报名中",
+      "status": "已截止",
       "site": "",
       "admit": "学硕/专硕/直博",
       "source": "jingguan.bjtu.edu.cn/show-357-10490.html",
       "remark": "经管院2027推免预报名系统9/8-9/11开通(预告,以后续正式办法为准);全体推免考生均需报名",
       "id": 2073,
-      "major": "工商管理"
+      "major": "工商管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京科技大学",
@@ -4480,13 +4497,14 @@
       "direction": "工商管理",
       "start": "2026-09-03",
       "end": "2026-09-11 18:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://grd.ccnu.edu.cn/student/ytmlogin",
       "admit": "学硕/专硕/直博",
       "source": "https://gs.ccnu.edu.cn/info/1028/6893.htm",
       "remark": "2027 预推免全校系统 9/3 8:00–9/11 18:00 开放，工商/工程在列",
       "id": 2119,
-      "major": "工商管理"
+      "major": "工商管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "湖南师范大学",
@@ -4839,14 +4857,15 @@
       "college": "经济管理学院",
       "direction": "管理科学与工程",
       "start": "",
-      "end": "",
-      "status": "待发布",
+      "end": "2026-09-12 09:00",
+      "status": "报名中",
       "site": "",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://sem.buaa.edu.cn/info/1116/18513.htm",
+      "remark": "北航经济管理学院2027接收推免工作方案（管理科学与工程），截止2026-09-12 09:00",
       "id": 3004,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京理工大学",
@@ -5153,15 +5172,16 @@
       "type": "985",
       "college": "船舶海洋与建筑工程学院",
       "direction": "工程管理",
-      "start": "",
-      "end": "",
-      "status": "待发布",
-      "site": "",
+      "start": "2026-09-06",
+      "end": "2026-09-11 15:00",
+      "status": "已截止",
+      "site": "http://ga.sjtu.edu.cn/zsgl/ytmgl/",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://naoce.sjtu.edu.cn/bsznyjszsgz/15769.html",
+      "remark": "上交船舶海洋与建筑工程学院2027预推免办法，报名截止2026-09-11 15:00（已过期）",
       "id": 3025,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "华东师范大学",
@@ -5560,13 +5580,14 @@
       "direction": "管理科学与工程",
       "start": "2026-09-08",
       "end": "2026-09-11 10:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://yz.scu.edu.cn/xly/login/",
       "admit": "学硕/专硕/直博",
       "source": "https://bs.scu.edu.cn/zhaosheng/202609/11110.html",
       "remark": "商学院2027推免预报名，网报截止2026-09-11 10:00",
       "id": 3052,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "四川大学",
@@ -5817,13 +5838,14 @@
       "direction": "管理科学与工程",
       "start": "2026-09-08",
       "end": "2026-09-11",
-      "status": "报名中",
+      "status": "已截止",
       "site": "",
       "admit": "学硕/专硕/直博",
       "source": "jingguan.bjtu.edu.cn/show-357-10490.html",
       "remark": "经管院2027推免预报名系统9/8-9/11开通(预告,以后续正式办法为准);全体推免考生均需报名",
       "id": 3069,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京交通大学",
@@ -5832,13 +5854,14 @@
       "direction": "工程管理",
       "start": "2026-09-08",
       "end": "2026-09-11 23:59",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://gsadmission.bjtu.edu.cn/recommend/signin/",
       "admit": "学硕/专硕/直博",
       "source": "https://civil.bjtu.edu.cn/cms/item/24019.html",
       "remark": "土木建筑工程学院2027推免预报名，系统开放2026-09-08 00:01至09-11 23:59（校推免预报名系统gsadmission.bjtu.edu.cn）",
       "id": 3070,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京交通大学",
@@ -5847,13 +5870,14 @@
       "direction": "物流工程与管理",
       "start": "2026-09-08",
       "end": "2026-09-11 23:59",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://gsadmission.bjtu.edu.cn/recommend/signin/",
       "admit": "学硕/专硕/直博",
       "source": "https://gs.bjtu.edu.cn/tzgg/zstzgg/07933714d84c4e9395a19557d431d220.htm",
       "remark": "交通运输学院2027推免预报名，窗口与全校一致2026-09-08至09-11 23:59（校推免预报名系统gsadmission.bjtu.edu.cn）；交通运输学院官方页trans.bjtu.edu.cn/cms/item/3541.html为附件(rar)通知，窗口以校汇总页为准",
       "id": 3071,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "北京科技大学",
@@ -6942,13 +6966,14 @@
       "direction": "管理科学与工程",
       "start": "2026-09-03",
       "end": "2026-09-11 18:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "https://grd.ccnu.edu.cn/student/ytmlogin",
       "admit": "学硕/专硕/直博",
       "source": "https://gs.ccnu.edu.cn/info/1028/6893.htm",
       "remark": "2027 预推免全校系统 9/3 8:00–9/11 18:00 开放，工商/工程在列",
       "id": 3144,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "湖南师范大学",
@@ -7075,15 +7100,16 @@
       "type": "211",
       "college": "工程技术学院",
       "direction": "工业工程与管理",
-      "start": "",
-      "end": "",
-      "status": "待发布",
-      "site": "",
+      "start": "2026-09-07",
+      "end": "2026-09-16",
+      "status": "报名中",
+      "site": "http://swu.yjszsw.cn/tm/",
       "admit": "学硕/专硕/直博",
-      "source": "",
-      "remark": "新专业条目，待核实2027预推免官方通知",
+      "source": "https://gcjsxy.swu.edu.cn/info/1147/4525.htm",
+      "remark": "西南大学工程技术学院2027接收推免生预报名通知，报名2026-09-07至2026-09-16",
       "id": 3153,
-      "major": "工程管理"
+      "major": "工程管理",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "西南交通大学",
@@ -7602,13 +7628,14 @@
       "direction": "计算机科学与技术",
       "start": "2026-09-07 12:00",
       "end": "2026-09-11 15:00",
-      "status": "报名中",
+      "status": "已截止",
       "site": "",
       "admit": "学硕/专硕/直博",
       "source": "https://sist.lnu.edu.cn/info/12675/2188.htm",
       "remark": "信息学部 2027 接收推免复试细则，推免系统 9/7 12:00–9/11 15:00 开放（二维码进入，无显式 URL）",
       "id": 145,
-      "major": "计算机"
+      "major": "计算机",
+      "updated_at": "2026-09-12"
     },
     {
       "school": "河北工业大学",
